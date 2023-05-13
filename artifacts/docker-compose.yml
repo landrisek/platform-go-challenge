@@ -1,0 +1,63 @@
+version: '3'
+services:
+  #migration:
+  #  image: migration:latest
+  #  environment:
+  #    - MYSQL_HOST=${MYSQL_HOST}
+  #    - MYSQL_PORT=${MYSQL_PORT}
+  #    - MYSQL_USER=${MYSQL_USER}
+  #    - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+  #    - MYSQL_DATABASE=${MYSQL_DATABASE}
+  #    - MIGRATIO_DIR=/app/datasource
+  #  depends_on:
+  #    - mysql
+  #  networks:
+  #    - back
+  #  volumes:
+  #    - ../datasource:/app/datasource
+  server:
+    image: server:latest
+    environment:
+      - VAULT_TOKEN=${VAULT_TOKEN}
+      - VAULT_ADDR=${VAULT_ADDR}
+      - SYSTEM_TYPE
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - vault
+      #- migrations
+    restart: always
+    networks:
+      - back
+      - front
+  vault:
+    image: vault
+    ports:
+      - 8200:8200
+    environment:
+      - VAULT_TOKEN=${VAULT_TOKEN}
+      - VAULT_ADDR=${VAULT_ADDR}
+      - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_TOKEN}
+    networks:
+      - back
+    container_name: artifacts_vault_1
+    volumes:
+      - ./vault:/vault/config
+  mysql:
+    image: mysql:5.7
+    networks:
+      - back
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    container_name: artifacts_mysql_1
+
+networks:
+  back:
+  front:
