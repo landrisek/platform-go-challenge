@@ -3,14 +3,11 @@ FROM golang:1.18 AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy go.mod and go.sum files
-COPY ../go.mod ../go.sum ./
+# Copy the source code to the working directory
+COPY . .
 
 # Download Go module dependencies
 RUN go mod download
-
-# Copy the source code to the working directory
-COPY . .
 
 # Build the Go application
 RUN go build -o server cmd/server/main.go

@@ -7,6 +7,9 @@ help:
 	@echo "make run-tests                   Run test suite for web server functionality"
 	@echo "make run-server                  Run web server"
 
+r:
+	./scripts/temp.sh
+
 build-server:
 	./scripts/install-go.sh && ./scripts/build-server.sh
 
