@@ -41,7 +41,7 @@ services:
       - back
       - front
   vault:
-    image: vault
+    image: vault:1.7.3
     env_file:
       - .env
     ports:
@@ -55,8 +55,8 @@ services:
     networks:
       - back
     container_name: artifacts_vault_1
-    volumes:
-      - ./vault:/vault/config
+    #volumes:
+    #  - ./vault:/vault/config
   mysql:
     image: mysql:5.7
     env_file:

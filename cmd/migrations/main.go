@@ -40,7 +40,7 @@ type VaultData struct {
 //curl --header "X-Vault-Token: myroot" --request GET  http://localhost:8200/v1/database/creds/sudo
 func makeRequest() {
 	fmt.Println("-------makeRequest()-------")
-	req, err := http.NewRequest(http.MethodGet, "http://vault:8200/v1/database/creds/sudo", nil)
+	req, err := http.NewRequest(http.MethodGet, "http://vault:8200/v1/mysql_sandbox/creds/sudo", nil)
 	if err != nil {
 		log.Fatal(err)
 	}

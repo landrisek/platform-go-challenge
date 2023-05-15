@@ -32,5 +32,5 @@ RUN chmod +x /app/migrations
 RUN chmod +x /app/provision-vault.sh
 
 # Set the entrypoint command to run the provisioning script and migrations
-#ENTRYPOINT ["sh", "/app/provision-vault.sh"]
+ENTRYPOINT ["sh", "/app/provision-vault.sh"]
 #CMD ["./migrations"]

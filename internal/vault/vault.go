@@ -26,8 +26,6 @@ func GetSQLCredentials(vaultConfig VaultConfig, mountPath string) (map[string]st
 	}
 
 	// Set the Vault token
-	vaultConfig.Token = "myroot"
-	vaultConfig.Address = "http://vault:8200"
 	client.SetToken(vaultConfig.Token)
 
 	// Read the SQL credentials from Vault
