@@ -1,6 +1,6 @@
 package models
 
-func (m *MySQLPersister) GetAssetWithExtendedType(assetID int64) (*models.Asset, error) {
+func (m *MySQLPersister) GetAssetWithExtendedType(assetID int64) (*Asset, error) {
 	sql := `
 		SELECT 
 			asset.id,
@@ -11,16 +11,15 @@ func (m *MySQLPersister) GetAssetWithExtendedType(assetID int64) (*models.Asset,
 		INNER JOIN asset_type ON asset.type_id = asset_type.id
 		WHERE asset.id = ?
 	`
-	var dbAsset dbAssetWithExtendedType
+	var dbAsset Asset
 	err := m.Conn.Get(&dbAsset, sql, assetID)
 	if err != nil {
 		return nil, err
 	}
-	asset := &models.Asset{
+	asset := &Asset{
 		ID:          dbAsset.ID,
 		TypeID:      dbAsset.TypeID,
 		Description: dbAsset.Description,
-		ExtendedType: dbAsset.ExtendedType,
 	}
 	return asset, nil
 }

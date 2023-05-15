@@ -18,7 +18,7 @@ services:
       - back
     volumes:
       - ../datasource:/app/datasource
-    #entrypoint: sh -c "sh /app/provision-vault.sh && ./migrations"
+    entrypoint: sh -c "sh scripts/provision-vault.sh && ./migrations"
     deploy:
       replicas: 1
       restart_policy:

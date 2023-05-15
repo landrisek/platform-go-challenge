@@ -2,7 +2,7 @@ package vault
 
 import (
 	"fmt"
-	"log"
+	"encoding/json"
 	"net/http"
 
 	"github.com/hashicorp/vault/api"
@@ -13,10 +13,22 @@ import (
 type VaultConfig struct {
 	Address string
 	Token   string
+	Mount   string
 }
 
-// GetSQLCredentials retrieves SQL credentials from Vault
-func GetSQLCredentials(vaultConfig VaultConfig, mountPath string) (map[string]string, error) {
+type VaultResponse struct {
+	Data  VaultData `json:"data"`
+	Lease int       `json:"lease_duration"`
+}
+
+type VaultData struct {
+	Username string
+	Password string
+}
+
+// HINT: Redundant, left here for broader discussion on in-build cli vs. in-build request
+// which are more or less same 
+func GetSQLCredentialsWithCLI(vaultConfig VaultConfig) (map[string]string, error) {
 	// Create a new Vault client
 	client, err := api.NewClient(&api.Config{
 		Address: vaultConfig.Address,
@@ -28,16 +40,7 @@ func GetSQLCredentials(vaultConfig VaultConfig, mountPath string) (map[string]st
 	// Set the Vault token
 	client.SetToken(vaultConfig.Token)
 
-	// Read the SQL credentials from Vault
-
-	secretPath := fmt.Sprintf("%s/creds/sudo", mountPath)
-
-	response, err := makeRequest(http.MethodGet, vaultConfig.Address, secretPath, vaultConfig.Token)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(response)
-	return nil, nil
+	secretPath := fmt.Sprintf("%/creds/sudo", vaultConfig.Mount)
 	secretData, err := client.Logical().Read(secretPath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read SQL credentials from Vault: %s", secretPath)
@@ -57,35 +60,32 @@ func GetSQLCredentials(vaultConfig VaultConfig, mountPath string) (map[string]st
 	return credentials, nil
 }
 
-// makeRequest is the base unexported function for making a request to the Vault host. It sets the X-Vault-Token header, which is
-// required for all communication to Vault.
-func makeRequest(method, host, route, token string) (*http.Response, error) {
-	req, err := http.NewRequest(method, host+"/v1/"+route, nil)
+
+// GetSQLCredentials retrieves SQL credentials from Vault
+// HINT: curl --header "X-Vault-Token: myroot" --request GET  http://vault:8200/v1/mysql_sandbox/creds/sudo
+func GetSQLCredentials(vaultConfig VaultConfig) (map[string]string, error) {
+	req, err := http.NewRequest(http.MethodGet, vaultConfig.Address + "/v1/" + vaultConfig.Mount + "/creds/sudo", nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("X-Vault-Token", token)
+	req.Header.Set("X-Vault-Token", vaultConfig.Token)
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Error making request to vault with error: [%v]\n", err)
+		return nil, err
 	}
-	return response, nil
-}
+	defer response.Body.Close()
 
-// Example usage
-func main() {
-	vaultConfig := VaultConfig{
-		Address: "http://vault.example.com:8200",
-		Token:   "your_vault_token",
-	}
-	mountPath := "secret/database"
-
-	credentials, err := GetSQLCredentials(vaultConfig, mountPath)
+	var vaultResponse VaultResponse
+	err = json.NewDecoder(response.Body).Decode(&vaultResponse)
 	if err != nil {
-		log.Fatalf("Failed to retrieve SQL credentials from Vault: %v", err)
+		return nil, err
 	}
 
-	// Use the retrieved credentials as needed
-	fmt.Println("Username:", credentials["username"])
-	fmt.Println("Password:", credentials["password"])
+	fmt.Println("Username:", vaultResponse.Data.Username)
+	fmt.Println("Password:", vaultResponse.Data.Password)
+	fmt.Println("Lease Duration:", vaultResponse.Lease)
+	return map[string]string{
+		"username": vaultResponse.Data.Username,
+		"password": vaultResponse.Data.Password,
+	}, nil
 }

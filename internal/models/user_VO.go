@@ -1,5 +1,11 @@
 package models
 
+import (
+	"time"
+
+	"github.com/pkg/errors"
+)
+
 // HINT: we can use this as value object, note implemented methods
 // TODO: guid?
 type User struct {
@@ -10,7 +16,7 @@ type User struct {
 }
 
 func (u *User) AddFavoriteAsset(assetID int64) {
-	return 0
+
 }
 
 // TODO: do encryption
@@ -54,14 +60,14 @@ func (u *User) GetLastMonthPurchaseCount() int {
 
 // GDPR encrypt sensitive data
 func (u *User) GDPR(ch CryptoHasher) (*User, error) {
-	if user.Email == "" {
+	if u.Email == "" {
 		return nil, errors.New("can't decrypt empty `Email` field")
 	}
-	encdata, err := ch.DecryptString(user.Email)
+	encdata, err := ch.DecryptString(u.Email)
 	if err != nil {
 		return nil, err
 	}
-	user.Email = encdata
+	u.Email = encdata
 
 	return u, nil
 }

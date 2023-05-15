@@ -1,6 +1,11 @@
 package models
 
-func (m *MySQLPersister) FindUserWithAssets(userID int64) (*models.User, error) {
+
+func (m *MySQLPersister) FindUser(userID int64) (*User, error)  {
+	return &User{}, nil
+}
+
+func (m *MySQLPersister) FindUserWithAssets(userID int64) (*User, error) {
 	user, err := m.FindUser(userID)
 	if err != nil {
 		return nil, err
@@ -17,18 +22,17 @@ func (m *MySQLPersister) FindUserWithAssets(userID int64) (*models.User, error) 
 		INNER JOIN user_favorite ON user_favorite.asset_id = asset.id
 		WHERE user_favorite.user_id = ?
 	`
-	var dbAssets []dbAssetWithExtendedType
+	var dbAssets []Asset
 	err = m.Conn.Select(&dbAssets, sql, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, dbAsset := range dbAssets {
-		asset := &models.Asset{
+		asset := &Asset{
 			ID:          dbAsset.ID,
 			TypeID:      dbAsset.TypeID,
 			Description: dbAsset.Description,
-			ExtendedType: dbAsset.ExtendedType,
 		}
 		user.Assets = append(user.Assets, asset)
 	}

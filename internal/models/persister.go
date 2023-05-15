@@ -1,13 +1,8 @@
 package models
 
 import (
-	"database/sql"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"reflect"
 	"strings"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -61,7 +56,12 @@ func NewMySQLPersister(conn *sqlx.DB, ch CryptoHasher) (*MySQLPersister, error) 
 	return mp, nil
 }
 
+func (persister MySQLPersister) InsertUser(u User, transtactions ...interface{}) (*User, error) {
+	return &User{}, nil
+}
 
-
+func (persister MySQLPersister) UpdateUser(u User, transtactions ...interface{}) (*User, error) {
+	return &User{}, nil
+}
 
 
