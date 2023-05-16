@@ -9,7 +9,7 @@ import (
 	"github.com/landrisek/platform-go-challenge/internal/vault"
 	"github.com/landrisek/platform-go-challenge/internal/models"
 
-	_ "github.com/go-sql-driver/mysql" // MySQL driver
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/pressly/goose"
 	"github.com/pkg/errors"
 )

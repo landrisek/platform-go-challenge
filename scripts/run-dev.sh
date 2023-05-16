@@ -16,8 +16,10 @@ set +a
 
 echo "Build local docker stack"
 # docker rmi server
-docker rmi migrations -f
+# docker rmi migrations -f
+docker rmi blacklist -f
 docker build -t server -f ./artifacts/server/Dockerfile .
 docker build -t migrations -f ./artifacts/migrations/Dockerfile .
+docker build -t blacklist -f ./artifacts/blacklist/Dockerfile .
 
 docker stack deploy -c ./artifacts/docker-compose.yml globalwebindex

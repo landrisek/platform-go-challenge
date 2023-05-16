@@ -10,7 +10,6 @@ import (
 type MySQLPersister struct {
 	Conn          *sqlx.DB
 	ch            CryptoHasher
-	userTxMethods map[string]func(User, ...interface{}) (*User, error)
 }
 
 // Crypto defines abstraction for
@@ -44,24 +43,8 @@ func NewMySQLPersister(conn *sqlx.DB, ch CryptoHasher) (*MySQLPersister, error) 
 		return nil, fmt.Errorf("unsupported DB driver %q", driver)
 	}
 
-	mp := &MySQLPersister{
+	return &MySQLPersister{
 		Conn: conn,
 		ch:   ch,
-	}
-	// define list of possible ExecuteTx operations
-	mp.userTxMethods = map[string]func(User, ...interface{}) (*User, error){
-		"INSERT": mp.InsertUser,
-		"UPDATE": mp.UpdateUser,
-	}
-	return mp, nil
+	}, nil
 }
-
-func (persister MySQLPersister) InsertUser(u User, transtactions ...interface{}) (*User, error) {
-	return &User{}, nil
-}
-
-func (persister MySQLPersister) UpdateUser(u User, transtactions ...interface{}) (*User, error) {
-	return &User{}, nil
-}
-
-

@@ -14,11 +14,12 @@ services:
       - VAULT_ADDR=${VAULT_ADDR}
     depends_on:
       - vault
+      - redis
     networks:
       - back
     volumes:
       - ../datasource:/app/datasource
-    entrypoint: sh -c "sh scripts/provision-vault.sh && ./migrations"
+    entrypoint: sh -c "sh scripts/provision-dev.sh && ./migrations"
     deploy:
       replicas: 1
       restart_policy:
@@ -32,7 +33,7 @@ services:
       - VAULT_ADDR=${VAULT_ADDR}
       - SYSTEM_TYPE
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     depends_on:
       - migrations
       - vault
@@ -40,6 +41,24 @@ services:
     networks:
       - back
       - front
+  blacklist:
+    image: blacklist:latest
+    env_file:
+      - .env
+    ports:
+      - "${BLACKLIST_PORT}:${BLACKLIST_PORT}"
+    restart: always
+    networks:
+      - back
+  redis:
+    image: redis:7.0.11
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    restart: always
+    networks:
+      - back
   vault:
     image: vault:1.7.3
     env_file:
@@ -55,8 +74,8 @@ services:
     networks:
       - back
     container_name: artifacts_vault_1
-    #volumes:
-    #  - ./vault:/vault/config
+    volumes:
+      - ./vault:/vault/config
   mysql:
     image: mysql:5.7
     env_file:
@@ -75,4 +94,5 @@ services:
 
 networks:
   back:
+  blacklist:
   front:

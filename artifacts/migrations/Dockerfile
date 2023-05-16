@@ -15,8 +15,8 @@ RUN go build -o migrations cmd/migrations/main.go
 # Install curl
 RUN apt-get update && apt-get install -y curl
 
+# Install Redis tools
+RUN apt-get update && apt-get install -y redis-tools
+
 # Make the migrations binary executable
 RUN chmod +x migrations
-
-# Set the entrypoint command to run the migrations
-#ENTRYPOINT ["./migrations"]
