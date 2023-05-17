@@ -7,12 +7,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/repository"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
 
+	"github.com/pkg/errors"
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
@@ -27,15 +29,18 @@ func NewCRUD(vaultConfig vault.VaultConfig, dbConfig models.DBConfig) (*CRUD, er
 	// Define the MySQL database connection string
 
 	dbURL, err := models.GetDatabaseURL(vaultConfig, dbConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed on vault in server")
+	}
 	// Open a connection to the database
 	db, err := sqlx.Open("mysql", dbURL)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed on mysql in server")
 	}
 	// Ping the database to check the connection
 	err = db.Ping()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed on mysql connection in server")
 	}
 
 	return &CRUD{
@@ -63,13 +68,13 @@ func RunServer(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, re
 		fmt.Fprint(w, "Hello, World!")
 	})
 	
-	router.HandleFunc("/read/{user_id}", AuthenticateAndCache(crud.Read, redisClient)).Methods(http.MethodGet)
+	router.HandleFunc("/read/{user_id}", Authenticate(crud.Read, redisClient)).Methods(http.MethodGet)
 	router.HandleFunc("/create", Authenticate(crud.Create, redisClient)).Methods(http.MethodPost)
 	router.HandleFunc("/update", Authenticate(crud.Update, redisClient)).Methods(http.MethodPut)
 	router.HandleFunc("/delete", Authenticate(crud.Delete, redisClient)).Methods(http.MethodDelete)
 
 	server := &http.Server{
-		Addr:           fmt.Sprintf("localhost:%s", port),
+		Addr:           fmt.Sprintf(":%s", port),
 		ReadTimeout:    60 * time.Second,
 		WriteTimeout:   60 * time.Second,
 		MaxHeaderBytes: 1 << 20,
@@ -96,25 +101,32 @@ func RunServer(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, re
 
 func Authenticate(route http.HandlerFunc, client *redis.Client) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		authToken := request.Header.Get("Authorization")
-		if !repository.IsValidToken(client, authToken) {
+		authHeader := request.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(writer, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		authParts := strings.Split(authHeader, " ")
+		var authToken string
+		if len(authParts) == 2 && authParts[0] == "Bearer" {
+			authToken = authParts[1]
+		}
+
+		if authToken == "" || !repository.IsValidToken(client, authToken)  {
 		    http.Error(writer, "Unauthorized", http.StatusUnauthorized)
 			return
+		}
+		if request.Method == http.MethodGet {
+			// TODO: use cache
 		}
 		// run route if authentication is successful
 		route(writer, request)
 	}
 }
 
-func AuthenticateAndCache(route http.HandlerFunc, client *redis.Client) http.HandlerFunc {
+func Cache(route http.HandlerFunc, client *redis.Client) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		authToken := request.Header.Get("Authorization")
-		if !repository.IsValidToken(client, authToken) {
-		    http.Error(writer, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		// run route if authentication is successful
-		route(writer, request)
+		// todo
 	}
 }
 

@@ -24,23 +24,23 @@ services:
       replicas: 1
       restart_policy:
         condition: none
-  server:
-    image: server:latest
-    env_file:
-      - .env
-    environment:
-      - VAULT_TOKEN=${VAULT_TOKEN}
-      - VAULT_ADDR=${VAULT_ADDR}
-      - SYSTEM_TYPE
-    ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
-    depends_on:
-      - migrations
-      - vault
-    restart: always
-    networks:
-      - back
-      - front
+  #server:
+  #  image: server:latest
+  #  env_file:
+  #    - .env
+  #  environment:
+  #    - VAULT_TOKEN=${VAULT_TOKEN}
+  #    - VAULT_ADDR=${VAULT_ADDR}
+  #    - SYSTEM_TYPE
+  #  ports:
+  #    - "${SERVER_PORT}:${SERVER_PORT}"
+  #  depends_on:
+  #    - migrations
+  #    - vault
+  #  restart: always
+  #  networks:
+  #    - back
+  #    - front
   blacklist:
     image: blacklist:latest
     env_file:

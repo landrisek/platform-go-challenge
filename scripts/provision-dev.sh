@@ -73,5 +73,6 @@ done
 redis-cli -h redis -p ${REDIS_PORT} SET blacklist.master controller
 redis-cli -h redis -p ${REDIS_PORT} SET blacklist.slave worker
 redis-cli -h redis -p ${REDIS_PORT} SET blacklist.greedy ambitious
+redis-cli -h redis -p ${REDIS_PORT} SET tokens.XXX YYY
 
 echo "Redis provisioning completed successfully."
