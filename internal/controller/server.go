@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/repository"
+	"github.com/landrisek/platform-go-challenge/internal/sagas"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
 
 	"github.com/pkg/errors"
@@ -21,11 +24,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type CRUD struct {
-	db *sqlx.DB
-}
-
-func NewCRUD(vaultConfig vault.VaultConfig, dbConfig models.DBConfig) (*CRUD, error) {
+func openDB(vaultConfig vault.VaultConfig, dbConfig models.DBConfig) (*sqlx.DB, error) {
 	// Define the MySQL database connection string
 
 	dbURL, err := models.GetDatabaseURL(vaultConfig, dbConfig)
@@ -43,9 +42,7 @@ func NewCRUD(vaultConfig vault.VaultConfig, dbConfig models.DBConfig) (*CRUD, er
 		return nil, errors.Wrap(err, "failed on mysql connection in server")
 	}
 
-	return &CRUD{
-		db: db,
-	}, nil
+	return db, nil
 }
 
 func RunServer(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, redisAddr string) error {
@@ -56,22 +53,21 @@ func RunServer(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, re
 		Addr: redisAddr,
 	})
 
-	crud, err := NewCRUD(vaultConfig, dbConfig)
+	// sql
+	db, err := openDB(vaultConfig, dbConfig)
 	if err != nil {
 		return err
 	}
+	// sagas
+	createSagas := sagas.Create(db)
 
 	router := mux.NewRouter()
 
 	// Define the CRUD routes
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Hello, World!")
-	})
-	
-	router.HandleFunc("/read/{user_id}", Authenticate(crud.Read, redisClient)).Methods(http.MethodGet)
-	router.HandleFunc("/create", Authenticate(crud.Create, redisClient)).Methods(http.MethodPost)
-	router.HandleFunc("/update", Authenticate(crud.Update, redisClient)).Methods(http.MethodPut)
-	router.HandleFunc("/delete", Authenticate(crud.Delete, redisClient)).Methods(http.MethodDelete)
+	router.HandleFunc("/create", Authenticate(createSagas.Run, redisClient)).Methods(http.MethodPost)
+	//router.HandleFunc("/read/{user_id}", Authenticate(create, redisClient)).Methods(http.MethodGet)
+	//router.HandleFunc("/update", Authenticate(Update, redisClient)).Methods(http.MethodPut)
+	//router.HandleFunc("/delete", Authenticate(Delete, redisClient)).Methods(http.MethodDelete)
 
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%s", port),
@@ -99,7 +95,9 @@ func RunServer(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, re
 	return nil
 }
 
-func Authenticate(route http.HandlerFunc, client *redis.Client) http.HandlerFunc {
+type orchestratorFunc func(sagas.GenericRequest) (sagas.GenericResponse, error)
+
+func Authenticate(orchestratorFn orchestratorFunc, client *redis.Client) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		authHeader := request.Header.Get("Authorization")
 		if authHeader == "" {
@@ -116,35 +114,68 @@ func Authenticate(route http.HandlerFunc, client *redis.Client) http.HandlerFunc
 		    http.Error(writer, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		if request.Method == http.MethodGet {
-			// TODO: use cache
+
+		// Read the request body
+		body, err := ioutil.ReadAll(request.Body)
+		if err != nil {
+			http.Error(writer, "Bad Request", http.StatusBadRequest)
+			return
 		}
-		// run route if authentication is successful
-		route(writer, request)
+		
+		// Create a new GenericRequest instance
+		var genericReq sagas.GenericRequest
+		
+		// Unmarshal the JSON body into the GenericRequest struct
+		err = json.Unmarshal(body, &genericReq)
+		if err != nil {
+			http.Error(writer, "Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		genericResp, err := orchestratorFn(genericReq)
+		if err != nil {
+			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		// Convert the response to JSON
+		jsonResponse, err := json.Marshal(genericResp)
+		if err != nil {
+			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		// Set the Content-Type header to application/json
+		writer.Header().Set("Content-Type", "application/json")
+
+		// Set the response status code to 200
+		writer.WriteHeader(http.StatusOK)
+
+		// Write the JSON response to the writer
+		_, err = writer.Write(jsonResponse)
+		if err != nil {
+			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		
 	}
 }
-
-func Cache(route http.HandlerFunc, client *redis.Client) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		// todo
-	}
-}
-
 
 // HINT: explain why one pointer, one not
-func (crud *CRUD) Read(writer http.ResponseWriter, request *http.Request) {
+func read(writer http.ResponseWriter, request *http.Request) {
+	// TODO: cache
 	fmt.Println("-------read-------")
 }
 
-func (crud *CRUD) Create(writer http.ResponseWriter, request *http.Request) {
+func create(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println("-------create-------")
+}
+
+func Update(writer http.ResponseWriter, request *http.Request) {
 
 }
 
-func (crud *CRUD) Update(writer http.ResponseWriter, request *http.Request) {
-
-}
-
-func (crud *CRUD) Delete(writer http.ResponseWriter, request *http.Request) {
+func Delete(writer http.ResponseWriter, request *http.Request) {
 
 }
 

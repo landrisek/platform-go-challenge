@@ -15,8 +15,8 @@ help:
 	@echo "make build-server                Build binary server stack build HINT: we can go without this, for discussion"
 	@echo "make run-server                  Run web server HINT: we can go without this, for discussion"
 
-r:
-	./scripts/get-user.sh
+c:
+	./scripts/create-asset.sh
 
 run-dev:
 	./scripts/install-go.sh && ./scripts/run-dev.sh

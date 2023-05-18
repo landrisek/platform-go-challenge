@@ -16,7 +16,7 @@ services:
       - vault
       - redis
     networks:
-      - back
+      - backend
     volumes:
       - ../datasource:/app/datasource
     entrypoint: sh -c "sh scripts/provision-dev.sh && ./migrations"
@@ -24,23 +24,6 @@ services:
       replicas: 1
       restart_policy:
         condition: none
-  #server:
-  #  image: server:latest
-  #  env_file:
-  #    - .env
-  #  environment:
-  #    - VAULT_TOKEN=${VAULT_TOKEN}
-  #    - VAULT_ADDR=${VAULT_ADDR}
-  #    - SYSTEM_TYPE
-  #  ports:
-  #    - "${SERVER_PORT}:${SERVER_PORT}"
-  #  depends_on:
-  #    - migrations
-  #    - vault
-  #  restart: always
-  #  networks:
-  #    - back
-  #    - front
   blacklist:
     image: blacklist:latest
     env_file:
@@ -49,7 +32,7 @@ services:
       - "${BLACKLIST_PORT}:${BLACKLIST_PORT}"
     restart: always
     networks:
-      - back
+      - backend
   redis:
     image: redis:7.0.11
     env_file:
@@ -58,7 +41,7 @@ services:
       - "${REDIS_PORT}:${REDIS_PORT}"
     restart: always
     networks:
-      - back
+      - backend
   vault:
     image: vault:1.7.3
     env_file:
@@ -72,7 +55,7 @@ services:
       - VAULT_ADDR=${VAULT_ADDR}
       - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_TOKEN}
     networks:
-      - back
+      - backend
     container_name: artifacts_vault_1
     volumes:
       - ./vault:/vault/config
@@ -81,7 +64,7 @@ services:
     env_file:
       - .env
     networks:
-      - back
+      - backend
     command: --default-authentication-plugin=mysql_native_password
     ports:
       - "3306:3306"
@@ -93,6 +76,4 @@ services:
     container_name: artifacts_mysql_1
 
 networks:
-  back:
-  blacklist:
-  front:
+  backend:
