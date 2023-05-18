@@ -8,31 +8,16 @@ while ! curl -s -o /dev/null -w "%{http_code}" $VAULT_ADDR/v1/sys/health >/dev/n
     sleep 30
 done
 
-if ! command -v mysqladmin >/dev/null 2>&1; then
-    echo "mysqladmin command was not found, so waiting for 20 seconds..."
-    for i in {1..20}; do
-        printf "."
-        sleep 1
-    done
-else
-    mysqladmin --port=$MYSQL_PORT status --user=$MYSQL_USER --password=$MYSQL_PASSWORD >/dev/null 2>&1
-    while [ $? -ne 0 ]; do
-        printf "_"
-        mysqladmin --port=$MYSQL_PORT status --user=$MYSQL_USER --password=$MYSQL_PASSWORD >/dev/null 2>&1
-        sleep 1
-    done
-    echo "Waiting for 10 seconds more..."
-    for i in {1..10}; do
-        printf "."
-        sleep 1
-    done
-    echo ""
-fi
+echo "Checking MySQL availability..."
+
+while ! mysqladmin ping -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" >/dev/null 2>&1; do
+    echo "MySQL is not available yet. Waiting for 30 seconds..."
+    sleep 30
+done
+
+echo "MySQL is now available!"
 
 # Enable and configure the secret engine
-#curl -s -X POST -H "X-Vault-Token: $VAULT_TOKEN" -d "{\"data\":{\"cryptoKey\":\"$CRYPTO_KEY\"}}" $VAULT_ADDR/v1/secret/data/keys/cryptoKey
-#curl -s -X POST -H "X-Vault-Token: $VAULT_TOKEN" -d "{\"data\":{\"hasherSalt\":\"$HASHER_SALT\"}}" $VAULT_ADDR/v1/secret/data/keys/hasherSalt
-#curl -s -X POST -H "X-Vault-Token: $VAULT_TOKEN" -d "{\"data\":{\"sha1sum\":\"$SHA1SUM\"}}" $VAULT_ADDR/v1/secret/data/keys/sha1sum
 curl -s -X POST -H "X-Vault-Token: $VAULT_TOKEN" -d '{"type": "database"}' $VAULT_ADDR/v1/sys/mounts/$VAULT_MOUNT
 curl -s -X POST -H "X-Vault-Token: $VAULT_TOKEN" -d "{\"plugin_name\":\"mysql-database-plugin\",\"connection_url\":\"root:$MYSQL_PASSWORD@tcp(mysql:3306)/$MYSQL_DATABASE\"}" $VAULT_ADDR/v1/$VAULT_MOUNT/config/connection
 curl -s -X POST -H "X-Vault-Token: $VAULT_TOKEN" -d "{\"plugin_name\":\"mysql-database-plugin\",\"connection_url\":\"root:$MYSQL_PASSWORD@tcp(mysql:3306)/$MYSQL_DATABASE\",\"lease\":\"720h\",\"lease_max\":\"720h\"}" $VAULT_ADDR/v1/$VAULT_MOUNT/config/lease

@@ -60,6 +60,31 @@ CREATE TABLE IF NOT EXISTS `audiences` (
   FOREIGN KEY (`id`) REFERENCES `assets` (`id`)
 );
 
+-- -----------------------------------------------------
+-- Table `permissions`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `token` VARCHAR(255),
+  `create` BOOLEAN,
+  `read` BOOLEAN,
+  `write` BOOLEAN,
+  `delete` BOOLEAN,
+  PRIMARY KEY (`id`)
+);
+
+-- -----------------------------------------------------
+-- Table `users_permissions`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `users_permissions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `users_id` INT NOT NULL,
+  `permissions_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`users_id`) REFERENCES `users` (`id`),
+  FOREIGN KEY (`permissions_id`) REFERENCES `permissions` (`id`)
+);
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
@@ -84,4 +109,13 @@ DROP TABLE IF EXISTS `assets`;
 
 -- Drop table `users`
 DROP TABLE IF EXISTS `users`;
+
+-- Drop table `users`
+DROP TABLE IF EXISTS `users`;
+
+-- Drop table `permissions`
+DROP TABLE IF EXISTS `permissions`;
+
+-- Drop table `users_permissions`
+DROP TABLE IF EXISTS `users_permissions`;
 

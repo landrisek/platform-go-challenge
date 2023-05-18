@@ -24,6 +24,16 @@ services:
       replicas: 1
       restart_policy:
         condition: none
+  user:
+    image: user:latest
+    env_file:
+      - .env
+    ports:
+      - "${USER_PORT}:${USER_PORT}"
+    restart: always
+    networks:
+      - backend
+      - frontend
   blacklist:
     image: blacklist:latest
     env_file:
@@ -77,3 +87,4 @@ services:
 
 networks:
   backend:
+  frontend:

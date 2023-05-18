@@ -18,5 +18,8 @@ RUN apt-get update && apt-get install -y curl
 # Install Redis tools
 RUN apt-get update && apt-get install -y redis-tools
 
+# Install the MariaDB client
+RUN apt-get update && apt-get install -y mariadb-client
+
 # Make the migrations binary executable
 RUN chmod +x migrations

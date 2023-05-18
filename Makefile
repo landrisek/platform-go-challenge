@@ -6,14 +6,15 @@ help:
 	@echo "make run-unit-tests              Run test unit suite for all microservices"
 	@echo "make run-integration-tests       Run test integration suite for web server functionality"
 	@echo "make run-blacklist-tests         Run all the test for blacklist microservice"
-	@echo "make run-server-tests            Run all the test for server microservice"
+	@echo "make run-asset-tests             Run all the test for asset microservice"
+	@echo "make run-asset                   Run asset microservice"
+
 	@echo "make create-asset                Hit REST API for create user asset"
-	@echo "make read-assets                  Hit REST API for read user assets"
+	@echo "make read-assets                 Hit REST API for read user assets"
 	@echo "make update-asset                Hit REST API for update user asset"
 	@echo "make delete-asset                Hit REST API for delete user asset"
 
-	@echo "make build-server                Build binary server stack build HINT: we can go without this, for discussion"
-	@echo "make run-server                  Run web server HINT: we can go without this, for discussion"
+	@echo "make build-asset                 Build binary asset stack"
 
 c:
 	./scripts/create-asset.sh
@@ -26,8 +27,10 @@ run-integration-tests:
 	./scripts/install-go.sh && ./scripts/run-integration-tests.sh
 run-blacklist-tests:
 	./scripts/install-go.sh && ./scripts/run-blacklist-tests.sh
-run-server-tests:
-	./scripts/install-go.sh && ./scripts/run-server-tests.sh
+run-asset-tests:
+	./scripts/install-go.sh && ./scripts/run-asset-tests.sh
+run-asset:
+	./scripts/install-go.sh && ./scripts/run-asset.sh
 create-asset:
 	./scripts/install-go.sh && ./scripts/create-asset.sh
 read-assets:
@@ -37,8 +40,5 @@ update-asset:
 delete-asset:
 	./scripts/install-go.sh && ./scripts/delete-asset.sh
 
-
-build-server:
-	./scripts/install-go.sh && ./scripts/build-server.sh
-run-server:
-	./scripts/install-go.sh && ./scripts/run-server.sh
+build-asset:
+	./scripts/install-go.sh && ./scripts/build-asset.sh
