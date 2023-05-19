@@ -21,10 +21,11 @@ import (
 
 
 
-func RunAsset(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, redisAddr string) error {
+func RunAsset(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, redisAddr, blacklistAddr, port string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	
+	// redis
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: redisAddr,
 	})
@@ -34,8 +35,9 @@ func RunAsset(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, red
 	if err != nil {
 		return err
 	}
+
 	// sagas
-	createSagas := sagas.Create(db)
+	createSagas := sagas.Create(db, blacklistAddr)
 
 	router := mux.NewRouter()
 

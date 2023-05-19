@@ -28,8 +28,10 @@ func main() {
 		Port:       port,
 		Database:   os.Getenv("MYSQL_DATABASE"),
 	}
+	blacklistAddr := fmt.Sprintf("http://localhost:%s", os.Getenv("BLACKLIST_PORT"))
 
-	err = controller.RunAsset(vaultConfig, dbConfig, serverPort, redisAddr)
+	// HINT: in case number of input parameters will increase we will introduce specific structure for them
+	err = controller.RunAsset(vaultConfig, dbConfig, redisAddr, blacklistAddr, serverPort,)
 	if err != nil {
 		log.Println("Received error:", err)
 	}

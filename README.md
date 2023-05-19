@@ -60,6 +60,9 @@ By focusing on clean design principles and ensuring comprehensive test coverage,
 
 While Redis caching can bring performance benefits by reducing database load and improving response times, it is considered a secondary optimization compared to the core functionality and quality of the system. As the system evolves, we will evaluate the need for implementing Redis cache based on performance benchmarks and user requirements.
 
+## Configuration
+For configuration was used environmental variables, for localhost development save under artifacts/.env and artifacts/.asset.env as a a lightweight and flexible option for simple configurations. For more complex structure can be introduce loading through yaml files, thus both needs to be properly secured.
+
 ## User Microservice
 
 In this particular case, the requirements specified CRUD operations on user assets, rather than CRUD operations on the user entity itself. However, it is evident that we cannot create an asset without an associated user.
@@ -75,7 +78,7 @@ The blacklist microservice was implemented as a simple example to showcase the e
 
 By incorporating the blacklist microservice within the saga, we can ensure that any content or input containing prohibited words is automatically modified before further processing. This not only helps maintain the integrity and appropriateness of the data but also allows for easy customization and expansion of the blacklist functionality.
 
-The implementation of the blacklist microservice highlights the power of the saga pattern in orchestrating complex workflows while maintaining a clear and modular structure. It serves as a valuable example of how well the saga pattern can accommodate additional operations and functionality within a microservices architecture.
+Moreover, if we will come to decision, that blacklist should be replaced by completly new microservice (e.g. in different language) or it will be replaced by better, external (even paid) service, it will be very easy to do so.
 
 ## Backup Microservice
 

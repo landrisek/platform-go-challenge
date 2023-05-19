@@ -25,14 +25,16 @@ func NewCreateSaga(db *sqlx.DB) Saga {
 }
 
 // Create perform all necessary steps to proper create given user assets
-func Create(db *sqlx.DB) Orchestrator {
+func Create(db *sqlx.DB, blacklistAddr string) Orchestrator {
 	orchestrator := SagaOrchestrator{}
+	orchestrator.AddSaga(NewBlacklistSaga(blacklistAddr))
 	orchestrator.AddSaga(NewCreateSaga(db))
 	return &orchestrator
 }
 
-func (saga *CreateSaga) Run(orchestrator Orchestrator, genericReq GenericRequest) error {
+func (saga *CreateSaga) Run(orchestrator Orchestrator) error {
 	var users []models.User
+	genericReq := orchestrator.GetRequest()
 	err := json.Unmarshal(genericReq.Data, &users)
 	if err != nil {
 		log.Println("Error on umarshaling in create saga:", err)

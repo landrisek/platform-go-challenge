@@ -24,7 +24,7 @@ func CreateAudience(db *sqlx.DB, audience Audience, userID int64) error {
 		return err
 	}
 
-	audienceInsertQuery := fmt.Sprintf("INSERT INTO %s (assets_id, characteristics) VALUES (?, ?, ?, ?)", audience)
+	audienceInsertQuery := fmt.Sprintf("INSERT INTO %s (assets_id, characteristics) VALUES (?, ?)", audiences)
 	_, err = db.Exec(audienceInsertQuery, assetID, audience.Characteristics)
 	if err != nil {
 		return err

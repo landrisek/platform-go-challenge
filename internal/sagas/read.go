@@ -17,15 +17,14 @@ func NewReadSaga(db *sqlx.DB) *ReadSaga {
 	}
 }
 
-func (saga *ReadSaga) Run(parent Orchestrator) error {
-	orchestrator := parent.(*SagaOrchestrator)
+func (saga *ReadSaga) Run(orchestrator Orchestrator) error {
 	var userID int
 	charts, err :=  models.ReadCharts(saga.db, userID)
 	if err != nil {
 		return err
 	}
 	generics := chartsToGenerics(charts)
-	orchestrator.Response = generics
+	orchestrator.SetResponse(generics)
 	return nil
 }
 

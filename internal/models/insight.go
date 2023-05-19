@@ -23,8 +23,7 @@ func CreateInsight(db *sqlx.DB, insight Insight, userID int64) error {
 	if err != nil {
 		return err
 	}
-
-	insightInsertQuery := fmt.Sprintf("INSERT INTO %s (assets_id, text) VALUES (?, ?, ?, ?)", insight)
+	insightInsertQuery := fmt.Sprintf("INSERT INTO %s (assets_id, text) VALUES (?, ?)", insights)
 	_, err = db.Exec(insightInsertQuery, assetID, insight.Text)
 	if err != nil {
 		return err

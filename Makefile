@@ -9,16 +9,17 @@ help:
 	@echo "make run-asset-tests             Run all the test for asset microservice"
 	@echo "make run-asset                   Run asset microservice"
 
-	@echo "make create-asset                Hit REST API for create user asset"
-	@echo "make read-assets                 Hit REST API for read user assets"
-	@echo "make update-asset                Hit REST API for update user asset"
-	@echo "make delete-asset                Hit REST API for delete user asset"
+	@echo "make create-assets               Hit REST API to create user assets"
+	@echo "make create-assets-with-errors   Hit REST API to create user assets with one existing and one non-existing user"
+	@echo "make read-assets                 Hit REST API to read user assets"
+	@echo "make update-asset                Hit REST API to update user asset"
+	@echo "make delete-asset                Hit REST API to delete user asset"
 
-	@echo "make create-asset                Hit REST API for create user asset"
+	@echo "make create-user                Hit REST API to create user"
 
 	@echo "make build-asset                 Build binary asset stack"
 	@echo "make db                          Open local mysql database in terminal"
-	@echo "make redis                          Open local redis database in terminal"
+	@echo "make redis                       Open local redis database in terminal"
 
 c:
 	./scripts/create-asset.sh
@@ -36,8 +37,10 @@ run-asset-tests:
 run-asset:
 	./scripts/install-go.sh && ./scripts/run-asset.sh
 
-create-asset:
-	./scripts/install-go.sh && ./scripts/create-asset.sh
+create-assets:
+	./scripts/install-go.sh && ./scripts/create-assets.sh
+create-assets-with-errors:
+	./scripts/install-go.sh && ./scripts/create-assets-with-errors.sh
 read-assets:
 	./scripts/install-go.sh && ./scripts/read-assets.sh
 update-asset:

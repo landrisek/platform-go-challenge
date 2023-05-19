@@ -4,19 +4,21 @@ import (
 	"context"
 	"sync"
 
+	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/go-redis/redis"
 )
 
 const blacklistPrefix = "blacklist"
 
-func Blacklist(ctx context.Context, client *redis.Client, data map[string]interface{}, errChan chan<- error) {
+func Blacklist(ctx context.Context, client *redis.Client, data []models.User, errChan chan<- error) []models.User {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go findBlacklist(ctx, client, data, &wg, errChan)
 	wg.Wait()
+	return data
 }
 
-func findBlacklist(ctx context.Context, client *redis.Client, data map[string]interface{}, wg *sync.WaitGroup, errChan chan<- error) {
+func findBlacklist(ctx context.Context, client *redis.Client, data []models.User, wg *sync.WaitGroup, errChan chan<- error) {
 	defer wg.Done()
 
 	select {
@@ -25,18 +27,61 @@ func findBlacklist(ctx context.Context, client *redis.Client, data map[string]in
 	default:
 	}
 
-	for key, value := range data {
-		if str, ok := value.(string); ok {
-			blacklisted, err := client.Get(blacklistPrefix + "." + str).Result()
-			if err == nil {
-				data[key] = blacklisted
+	// Set up the semaphore
+	sem := make(chan struct{}, 10) // Change the value according to the desired concurrency limit
+
+	for key := range data {
+		user := &data[key]
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			sem <- struct{}{} // Acquire a semaphore slot
+			blacklistAssets(ctx, client, user, errChan)
+			<-sem // Release the semaphore slot
+		}()
+	}
+}
+
+func blacklistAssets(ctx context.Context, client *redis.Client, user *models.User, errChan chan<- error) {
+
+	var wg sync.WaitGroup
+	wg.Add(len(user.Charts) + len(user.Insights) + len(user.Audiences))
+
+	for i := range user.Charts {
+		go func(i int) {
+			defer wg.Done()
+			chart := &user.Charts[i]
+			if blacklisted, err := client.Get(blacklistPrefix + "." + chart.Description).Result(); err == nil {
+				chart.Description = blacklisted
 			} else {
 				errChan <- err
 			}
-		} else if nestedData, ok := value.(map[string]interface{}); ok {
-			wg.Add(1)
-			// TODO: goroutine pool managment
-			go findBlacklist(ctx, client, nestedData, wg, errChan)
-		}
+		}(i)
 	}
+
+	for i := range user.Insights {
+		go func(i int) {
+			defer wg.Done()
+			insight := &user.Insights[i]
+			if blacklisted, err := client.Get(blacklistPrefix + "." + insight.Description).Result(); err == nil {
+				insight.Description = blacklisted
+			} else {
+				errChan <- err
+			}
+		}(i)
+	}
+
+	for i := range user.Audiences {
+		go func(i int) {
+			defer wg.Done()
+			audience := &user.Audiences[i]
+			if blacklisted, err := client.Get(blacklistPrefix + "." + audience.Description).Result(); err == nil {
+				audience.Description = blacklisted
+			} else {
+				errChan <- err
+			}
+		}(i)
+	}
+
+	wg.Wait()
 }
