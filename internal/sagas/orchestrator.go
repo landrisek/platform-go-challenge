@@ -26,6 +26,8 @@ type RequestResponseFormat string
 type Orchestrator interface {
 	AddSaga(Saga) error
 	Run(GenericRequest) (GenericResponse, error)
+	GetResponse() GenericResponse
+	SetResponse(GenericResponse)
 }
 
 type Saga interface {
@@ -42,20 +44,13 @@ type SagaOrchestrator struct {
 func NewOrchestrator(db *sqlx.DB) Orchestrator {
 	return &SagaOrchestrator{
 		db: db,
+		Response: GenericResponse{},
 	}
 }
 
-func (saga *SagaOrchestrator) AddSaga(step Saga) error {
-	saga.steps = append(saga.steps, step)
+func (orchestrator *SagaOrchestrator) AddSaga(step Saga) error {
+	orchestrator.steps = append(orchestrator.steps, step)
 	return nil
-}
-
-type RetrievableError struct {
-
-}
-
-func (e RetrievableError) Error() string {
-	return "Retrievable error happened"
 }
 
 func (orchestrator *SagaOrchestrator) Run(request GenericRequest) (GenericResponse, error) {
@@ -70,17 +65,17 @@ func (orchestrator *SagaOrchestrator) Run(request GenericRequest) (GenericRespon
 						err = fmt.Errorf("after failed: %w, also retrieval failed: %v", err, sErr)					
 					}
 				}
-				return GenericResponse{}, err
+				return orchestrator.Response, err
 			}
-
 		}
 	}
 	return orchestrator.Response, nil
 }
 
-// Create perform all necessary steps to proper create given user assets
-func Create(db *sqlx.DB) Orchestrator {
-	orchestrator := SagaOrchestrator{}
-	orchestrator.AddSaga(NewCreateSaga(db))
-	return &orchestrator
+func (orchestrator *SagaOrchestrator) GetResponse() GenericResponse {
+	return orchestrator.Response
+}
+
+func (orchestrator *SagaOrchestrator) SetResponse(response GenericResponse) {
+	orchestrator.Response = response
 }

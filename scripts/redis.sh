@@ -1,0 +1,1 @@
+docker exec -it $(docker ps -qf "name=globalwebindex_redis.1*") redis-cli

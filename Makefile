@@ -14,7 +14,11 @@ help:
 	@echo "make update-asset                Hit REST API for update user asset"
 	@echo "make delete-asset                Hit REST API for delete user asset"
 
+	@echo "make create-asset                Hit REST API for create user asset"
+
 	@echo "make build-asset                 Build binary asset stack"
+	@echo "make db                          Open local mysql database in terminal"
+	@echo "make redis                          Open local redis database in terminal"
 
 c:
 	./scripts/create-asset.sh
@@ -31,6 +35,7 @@ run-asset-tests:
 	./scripts/install-go.sh && ./scripts/run-asset-tests.sh
 run-asset:
 	./scripts/install-go.sh && ./scripts/run-asset.sh
+
 create-asset:
 	./scripts/install-go.sh && ./scripts/create-asset.sh
 read-assets:
@@ -40,5 +45,12 @@ update-asset:
 delete-asset:
 	./scripts/install-go.sh && ./scripts/delete-asset.sh
 
+create-user:
+	./scripts/install-go.sh && ./scripts/create-user.sh
+
 build-asset:
 	./scripts/install-go.sh && ./scripts/build-asset.sh
+db:
+	./scripts/db.sh
+redis:
+	./scripts/redis.sh

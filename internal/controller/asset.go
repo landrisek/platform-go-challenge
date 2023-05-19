@@ -83,6 +83,7 @@ func Generic(orchestratorFn orchestratorFunc, client *redis.Client) http.Handler
 		// Read the request body
 		body, err := ioutil.ReadAll(request.Body)
 		if err != nil {
+			log.Println("Error on reading request:", err)
 			http.Error(writer, "Bad Request", http.StatusBadRequest)
 			return
 		}
@@ -91,14 +92,16 @@ func Generic(orchestratorFn orchestratorFunc, client *redis.Client) http.Handler
 		var genericReq sagas.GenericRequest
 		
 		// Unmarshal the JSON body into the GenericRequest struct
-		err = json.Unmarshal(body, &genericReq)
+		err = json.Unmarshal(body, &genericReq.Data)
 		if err != nil {
+			log.Println("Error on umarshaling request: ", err)
 			http.Error(writer, "Bad Request", http.StatusBadRequest)
 			return
 		}
 
 		genericResp, err := orchestratorFn(genericReq)
 		if err != nil {
+			log.Println("Error on running orchestrator:", err)
 			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -106,6 +109,7 @@ func Generic(orchestratorFn orchestratorFunc, client *redis.Client) http.Handler
 		// Convert the response to JSON
 		jsonResponse, err := json.Marshal(genericResp)
 		if err != nil {
+			log.Println("Error on marshalling response:", err)
 			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -124,24 +128,6 @@ func Generic(orchestratorFn orchestratorFunc, client *redis.Client) http.Handler
 		}
 		
 	}
-}
-
-// HINT: explain why one pointer, one not
-func read(writer http.ResponseWriter, request *http.Request) {
-	// TODO: cache
-	fmt.Println("-------read-------")
-}
-
-func create(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("-------create-------")
-}
-
-func Update(writer http.ResponseWriter, request *http.Request) {
-
-}
-
-func Delete(writer http.ResponseWriter, request *http.Request) {
-
 }
 
 // Log logs an error message along with the provided error.

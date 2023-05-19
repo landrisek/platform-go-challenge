@@ -1,0 +1,1 @@
+docker exec -it $(docker ps -qf "name=globalwebindex_mysql.1*") mysql -u sandbox -p"pass" sandbox

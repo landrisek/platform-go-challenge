@@ -48,6 +48,7 @@ func RunUser(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, redi
 
 	// Define the CRUD routes
 	router.HandleFunc("/create", crud.Create).Methods(http.MethodPost)
+	// TODO: implement rest of RUD operations
 
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%s", port),
@@ -76,7 +77,6 @@ func RunUser(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, redi
 }
 
 func (crud CRUD) Create(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("-------create user-------")
 	permissionID, err := Authenticate(request.Header, crud.redis)
 	if err != nil {
 		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
@@ -97,8 +97,25 @@ func (crud CRUD) Create(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
-	models.CreateUser(crud.db, user)
+	userID, err := models.CreateUser(crud.db, user)
+	if err != nil {
+		http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Encode the response as JSON
+	responseJSON, err := json.Marshal(struct {
+		UserID int64 `json:"user_id"`
+	}{
+		UserID: userID,
+	})
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte("User created successfully"))	
+	writer.Write(responseJSON)
 
 }

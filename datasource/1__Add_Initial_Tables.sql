@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `assets` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `type` ENUM('Chart', 'Insight', 'Audience') NOT NULL,
-  `title` VARCHAR(100) NOT NULL,
   `user_id` INT NOT NULL,
+  `type` ENUM('charts', 'insights', 'audiences') NOT NULL,
+  `description` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 );
@@ -30,34 +30,35 @@ CREATE TABLE IF NOT EXISTS `assets` (
 -- Table `charts`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `charts` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `assets_id` INT NOT NULL,
+  `title` VARCHAR(255),
   `axes_titles` VARCHAR(255),
   `data` VARCHAR(255),
-  `description` VARCHAR(255),
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`id`) REFERENCES `assets` (`id`)
+  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`)
 );
 
 -- -----------------------------------------------------
 -- Table `insights`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `insights` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `assets_id` INT NOT NULL,
   `text` VARCHAR(255),
-  `description` VARCHAR(255),
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`id`) REFERENCES `assets` (`id`)
+  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`)
 );
 
 -- -----------------------------------------------------
 -- Table `audiences`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `audiences` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `assets_id` INT NOT NULL,
   `characteristics` VARCHAR(255),
-  `description` VARCHAR(255),
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`id`) REFERENCES `assets` (`id`)
+  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`)
 );
 
 -- -----------------------------------------------------

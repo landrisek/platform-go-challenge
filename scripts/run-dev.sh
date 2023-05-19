@@ -2,19 +2,21 @@
 
 set -e
 
-echo "Remove previous stack"
-
 # scaling down previous stack
-docker service scale globalwebindex_blacklist=0
-docker service scale globalwebindex_user=0
-docker service scale globalwebindex_mysql=0
-docker service scale globalwebindex_redis=0
-docker service scale globalwebindex_vault=0
+stack="globalwebindex"
 
-docker stack rm globalwebindex
+if docker stack ls --format '{{.Name}}' | grep -q "^$stack$"; then
+    echo "Removing previous '$stack' stack."
+    docker service scale "$stack"_blacklist=0
+    docker service scale "$stack"_user=0
+    docker service scale "$stack"_mysql=0
+    docker service scale "$stack"_redis=0
+    docker service scale "$stack"_vault=0
 
-# todo: wait until cleanup
-sleep 20s
+    docker stack rm "$stack"
+    # wait until cleanup
+    sleep 20s
+fi
 
 set -a
 source ./artifacts/.env

@@ -81,6 +81,7 @@ func GetSQLCredentials(vaultConfig VaultConfig) (map[string]string, error) {
 		return nil, err
 	}
 
+	// HINT: this will be removed, left here for discussion
 	fmt.Println("Username:", vaultResponse.Data.Username)
 	fmt.Println("Password:", vaultResponse.Data.Password)
 	fmt.Println("Lease Duration:", vaultResponse.Lease)

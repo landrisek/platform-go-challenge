@@ -19,7 +19,7 @@ services:
       - backend
     volumes:
       - ../datasource:/app/datasource
-    entrypoint: sh -c "sh scripts/provision-dev.sh && ./migrations"
+    entrypoint: sh -c "sh scripts/provision-dev.sh && ./migrations && sh scripts/provision-mysql.sh"
     deploy:
       replicas: 1
       restart_policy:
