@@ -14,6 +14,8 @@ type Asset struct {
 	UserID      int64  `db:"user_id"`
 }
 
+type AssetDescription string
+
 const assets = "assets"
 
 func createAsset(db *sqlx.DB, asset Asset) (int64, error) {

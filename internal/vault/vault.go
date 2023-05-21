@@ -40,7 +40,7 @@ func GetSQLCredentialsWithCLI(vaultConfig VaultConfig) (map[string]string, error
 	// Set the Vault token
 	client.SetToken(vaultConfig.Token)
 
-	secretPath := fmt.Sprintf("%/creds/sudo", vaultConfig.Mount)
+	secretPath := fmt.Sprintf("%s/creds/sudo", vaultConfig.Mount)
 	secretData, err := client.Logical().Read(secretPath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read SQL credentials from Vault: %s", secretPath)
@@ -59,7 +59,6 @@ func GetSQLCredentialsWithCLI(vaultConfig VaultConfig) (map[string]string, error
 
 	return credentials, nil
 }
-
 
 // GetSQLCredentials retrieves SQL credentials from Vault
 // HINT: curl --header "X-Vault-Token: myroot" --request GET  http://vault:8200/v1/mysql_sandbox/creds/sudo

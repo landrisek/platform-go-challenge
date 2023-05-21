@@ -40,7 +40,7 @@ type Saga interface {
 type SagaOrchestrator struct {
 	db       *sqlx.DB
 	response GenericResponse
-	request GenericRequest
+	request  GenericRequest
 	steps    []Saga
 }
 

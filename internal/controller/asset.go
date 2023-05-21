@@ -17,9 +17,8 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 )
-
-
 
 func RunAsset(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, redisAddr, blacklistAddr, port string) error {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -37,15 +36,18 @@ func RunAsset(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, redisAddr
 	}
 
 	// sagas
-	createSagas := sagas.Create(db, blacklistAddr)
+	createOrchestrator := sagas.Create(db, blacklistAddr)
+	readOrchestrator := sagas.Read(db, redisClient)
+	updateOrchestrator := sagas.Update(db)
+	deleteOrchestartor := sagas.Delete(db)
 
 	router := mux.NewRouter()
 
 	// Define the CRUD routes
-	router.HandleFunc("/create", Generic(createSagas.Run, redisClient)).Methods(http.MethodPost)
-	//router.HandleFunc("/read/{user_id}", Authenticate(create, redisClient)).Methods(http.MethodGet)
-	//router.HandleFunc("/update", Authenticate(Update, redisClient)).Methods(http.MethodPut)
-	//router.HandleFunc("/delete", Authenticate(Delete, redisClient)).Methods(http.MethodDelete)
+	router.HandleFunc("/create", Generic(createOrchestrator.Run, db, "create")).Methods(http.MethodPost)
+	router.HandleFunc("/read", Generic(readOrchestrator.Run, db, "read")).Methods(http.MethodPost)
+	router.HandleFunc("/update", Generic(updateOrchestrator.Run, db, "update")).Methods(http.MethodPut)
+	router.HandleFunc("/delete", Generic(deleteOrchestartor.Run, db, "delete")).Methods(http.MethodDelete)
 
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%s", port),
@@ -75,9 +77,10 @@ func RunAsset(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, redisAddr
 
 type orchestratorFunc func(sagas.GenericRequest) (sagas.GenericResponse, error)
 
-func Generic(orchestratorFn orchestratorFunc, client *redis.Client) http.HandlerFunc {
+func Generic(orchestratorFn orchestratorFunc, db *sqlx.DB, permission string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		_, err := Authenticate(request.Header, client)
+		fmt.Println("---------Generic-----------")
+		err := Authenticate(request.Header, db, permission)
 		if err != nil {
 			http.Error(writer, "Unauthorized", http.StatusUnauthorized)
 			return	
@@ -96,7 +99,7 @@ func Generic(orchestratorFn orchestratorFunc, client *redis.Client) http.Handler
 		// Unmarshal the JSON body into the GenericRequest struct
 		err = json.Unmarshal(body, &genericReq.Data)
 		if err != nil {
-			log.Println("Error on umarshaling request: ", err)
+			log.Println("Error on unmarshaling request: ", err)
 			http.Error(writer, "Bad Request", http.StatusBadRequest)
 			return
 		}

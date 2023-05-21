@@ -13,7 +13,6 @@ import (
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
 
-	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/go-sql-driver/mysql"
@@ -21,17 +20,12 @@ import (
 
 type CRUD struct {
 	db    *sqlx.DB
-	redis *redis.Client
 }
 
-func RunUser(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, redisAddr string) error {
+func RunUser(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: redisAddr,
-	})
-
 	// sql
 	db, err := models.OpenDB(vaultConfig, dbConfig)
 	if err != nil {
@@ -41,14 +35,13 @@ func RunUser(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, redi
 	// user handler
 	crud := CRUD{
 		db:    db,
-		redis: redisClient,
 	}
 
 	router := mux.NewRouter()
 
 	// Define the CRUD routes
 	router.HandleFunc("/create", crud.Create).Methods(http.MethodPost)
-	// TODO: implement rest of RUD operations
+	// TODO: implement rest of (C)RUD operations
 
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%s", port),
@@ -77,18 +70,9 @@ func RunUser(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port, redi
 }
 
 func (crud CRUD) Create(writer http.ResponseWriter, request *http.Request) {
-	permissionID, err := Authenticate(request.Header, crud.redis)
+	err := Authenticate(request.Header, crud.db, "create")
 	if err != nil {
 		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
-		return	
-	}
-	permission, err := models.ReadPermission(crud.db, permissionID)
-	if err != nil {
-		http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	if !permission.Create {
-		http.Error(writer, "Unauthorized: Insufficient permission", http.StatusForbidden)
 		return	
 	}
 	var user models.User

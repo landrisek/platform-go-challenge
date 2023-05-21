@@ -54,6 +54,8 @@ However, it's important to note that while Redis is a performant and efficient d
 
 ## Cache and hot spots
 
+Data structure expect that no json field is mandatory - this allows to reduce amount of bytes trafficed through TCP, free caller from providing unnecessary data and also do not write data in mysql which are there (or at least do not require IGNORE WRITE logic including). However it require additional logic and validation in model layer.
+
 While the implementation of Redis cache was not included in the current version of the system, it is a consideration for future enhancements. However, it is important to note that we prioritize other aspects such as clean design, proper testing, and overall system reliability over the implementation of a caching layer.
 
 By focusing on clean design principles and ensuring comprehensive test coverage, we aim to build a robust and scalable microservices architecture. These aspects lay a solid foundation for the system's performance and maintainability.
@@ -82,7 +84,7 @@ Moreover, if we will come to decision, that blacklist should be replaced by comp
 
 ## Backup Microservice
 
-Was not implemented. Propose design was to archive soft-delete entries to something like glacier or separate instance of redis and hard-delete them. 
+Was not implemented. Propose design was to archive soft-delete entries to something like glacier or separate instance of redis and hard-delete them. This kind of archivation would require also implementing of soft delete. For now and for keeping architecture and data clean and tidy, hard delete through ON CASCADE option was implemented.
 
 ## Security
 
@@ -90,4 +92,4 @@ For authentication was used simple token stored both in redis and mysql. Crud pe
 
 ## Tests
 
-Last, but not least.
+Last, but not least. For maintaing tests are used tags: you can run unit, integration, dedicated to specific microservice (asset, blacklist, user) and one end-to-end-test (for this whole local development needs to be running and for cloud solution infractructure stand up will be part of pipeline).

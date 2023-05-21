@@ -10,9 +10,17 @@ import (
 type User struct {
 	ID        int64      `json:"id"`
 	Name      string     `json:"name"`
+	Audiences []Audience `json:"audiences"`
 	Charts    []Chart    `json:"charts"`
 	Insights  []Insight  `json:"insights"`
-	Audiences []Audience `json:"audiences"`
+}
+
+type UserSafeUpdate struct {
+	ID        int64                 `json:"id"`
+	Name      string                `json:"name"`
+	Audiences []AudienceSafeUpdate `json:"audiences"`
+	Charts    []ChartSafeUpdate    `json:"charts"`
+	Insights  []InsightSafeUpdate  `json:"insights"`
 }
 
 func CreateUser(db *sqlx.DB, user User) (int64, error) {

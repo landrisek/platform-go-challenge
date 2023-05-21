@@ -3,18 +3,17 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
-	"github.com/landrisek/platform-go-challenge/internal/repository"
+	"github.com/landrisek/platform-go-challenge/internal/models"
 
-	"github.com/go-redis/redis"
+	"github.com/jmoiron/sqlx"
 )
 
-func Authenticate(header http.Header, client *redis.Client) (int, error) {
+func Authenticate(header http.Header, db *sqlx.DB, permission string) error {
 	authHeader := header.Get("Authorization")
 	if authHeader == "" {
-		return 0, fmt.Errorf("Unauthorized")
+		return fmt.Errorf("Unauthorized")
 	}
 	authParts := strings.Split(authHeader, " ")
 	var authToken string
@@ -22,12 +21,8 @@ func Authenticate(header http.Header, client *redis.Client) (int, error) {
 		authToken = authParts[1]
 	}
 	if authToken == "" {
-		return 0, fmt.Errorf("Empty token")
+		return fmt.Errorf("Empty token")
 	}
-	tokenID, err := repository.IsValidToken(client, authToken)
-	if err != nil  {
-		return 0, err
-	}
-	id, err := strconv.Atoi(tokenID)
-	return id, nil
+	_, err := models.IsValidPermission(db, permission, authToken)
+	return err
 }

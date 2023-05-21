@@ -22,19 +22,19 @@ func (saga *BlacklistSaga) Run(orchestrator Orchestrator) error {
 	// Send the HTTP request
 	resp, err := http.Post(saga.blacklistAddr, "application/json", bytes.NewBuffer(genericReq.Data))
 	if err != nil {
-		return fmt.Errorf("Error sending HTTP request:", err)
+		return fmt.Errorf("Error sending HTTP request: %v", err)
 	}
 	defer resp.Body.Close()
 	
 	// Read the response body
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("Error reading response body:", err)
+		return fmt.Errorf("Error reading response body: %v", err)
 	}
 	
 	// Process the response
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Error response:", resp.Status)
+		return fmt.Errorf("Error response: %s", resp.Status)
 	}
 
 	genericReq.Data = respBody

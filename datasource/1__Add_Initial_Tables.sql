@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `assets` (
   `type` ENUM('charts', 'insights', 'audiences') NOT NULL,
   `description` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 );
 
 -- -----------------------------------------------------
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `charts` (
   `axes_titles` VARCHAR(255),
   `data` VARCHAR(255),
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`)
+  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE
 );
 
 -- -----------------------------------------------------
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `insights` (
   `assets_id` INT NOT NULL,
   `text` VARCHAR(255),
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`)
+  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE
 );
 
 -- -----------------------------------------------------
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `audiences` (
   `assets_id` INT NOT NULL,
   `characteristics` VARCHAR(255),
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`)
+  FOREIGN KEY (`assets_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE
 );
 
 -- -----------------------------------------------------
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `permissions` (
   `token` VARCHAR(255),
   `create` BOOLEAN,
   `read` BOOLEAN,
-  `write` BOOLEAN,
+  `update` BOOLEAN,
   `delete` BOOLEAN,
   PRIMARY KEY (`id`)
 );

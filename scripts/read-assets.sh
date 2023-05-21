@@ -1,3 +1,3 @@
 #!/bin/bash
 
-curl -H "Authorization: Bearer XXX" http://localhost:8080/read/1
+curl -v -X POST -H "Authorization: Bearer XXX" -H "Content-Type: application/json" -d '[{"id": 1}]' http://localhost:8080/read

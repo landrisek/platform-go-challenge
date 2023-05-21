@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -10,13 +12,13 @@ type Permission struct {
 	Token  string `db:"token"`
 	Create bool   `db:"create"`
 	Read   bool   `db:"read"`
-	Write  bool   `db:"write"`
+	Update  bool  `db:"update"`
 	Delete bool   `db:"delete"`
 }
 
-func ReadPermission(db *sqlx.DB, id int) (*Permission, error) {
+func IsValidPermission(db *sqlx.DB, column string, token string) (*Permission, error) {
 	permission := Permission{}
-	err := db.Get(&permission, "SELECT * FROM permissions WHERE id = ?", id)
+	err := db.Get(&permission, fmt.Sprintf("SELECT * FROM permissions WHERE `%s` = ? AND token = ?", column), 1, token)
 	if err != nil {
 		return nil, err
 	}

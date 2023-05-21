@@ -5,38 +5,32 @@ import (
 	"log"
 
 	"github.com/landrisek/platform-go-challenge/internal/models"
-
 	"github.com/jmoiron/sqlx"
 )
 
-type CreateSaga struct {
+type DeleteSaga struct {
 	db *sqlx.DB
 }
 
-type CreateUserRequest struct {
-	Users map[string]models.User `json:"users"`
-}
-
-func NewCreateSaga(db *sqlx.DB) Saga {
-	return &CreateSaga{
+func NewDeleteSaga(db *sqlx.DB) *DeleteSaga {
+	return &DeleteSaga{
 		db: db,
 	}
 }
 
-// Create perform all necessary steps to proper create given user assets
-func Create(db *sqlx.DB, blacklistAddr string) Orchestrator {
+// Delete perform all necessary steps to delete given user assets
+func Delete(db *sqlx.DB) Orchestrator {
 	orchestrator := SagaOrchestrator{}
-	orchestrator.AddSaga(NewBlacklistSaga(blacklistAddr))
-	orchestrator.AddSaga(NewCreateSaga(db))
+	orchestrator.AddSaga(NewDeleteSaga(db))
 	return &orchestrator
 }
 
-func (saga *CreateSaga) Run(orchestrator Orchestrator) error {
+func (saga *DeleteSaga) Run(orchestrator Orchestrator) error {
 	var users []models.User
 	genericReq := orchestrator.GetRequest()
 	err := json.Unmarshal(genericReq.Data, &users)
 	if err != nil {
-		log.Println("Error on unmarshaling in create saga:", err)
+		log.Println("Error on unmarshaling in update saga:", err)
 		return err
 	}
 
@@ -49,7 +43,7 @@ func (saga *CreateSaga) Run(orchestrator Orchestrator) error {
 		}
 		// audiences
 		for _, audience := range user.Audiences {
-			err := models.CreateAudience(saga.db, audience, user.ID)
+			err := models.DeleteAudience(saga.db, audience.ID, user.ID)
 			if err != nil {
 				log.Println("Error on create audience:", err)
 				audience.Error = "Database error on audience"
@@ -58,7 +52,7 @@ func (saga *CreateSaga) Run(orchestrator Orchestrator) error {
 		}
 		// charts
 		for _, chart := range user.Charts {
-			err := models.CreateChart(saga.db, chart, user.ID)
+			err := models.DeleteChart(saga.db, chart.ID, user.ID)
 			if err != nil {
 				log.Println("Error on create chart:", err)
 				chart.Error = "Database error on chart"
@@ -67,9 +61,9 @@ func (saga *CreateSaga) Run(orchestrator Orchestrator) error {
 		}
 		// insights
 		for _, insight := range user.Insights {
-			err := models.CreateInsight(saga.db, insight, user.ID)
+			err := models.DeleteInsight(saga.db, insight.ID, user.ID)
 			if err != nil {
-				log.Println("Error on create insight:", err)
+				log.Println("Error on update insight:", err)
 				insight.Error = "Database error on insight"
 				respUser.Insights = append(respUser.Insights, insight)
 			}
@@ -93,6 +87,6 @@ func (saga *CreateSaga) Run(orchestrator Orchestrator) error {
 	return nil
 }
 
-func (saga *CreateSaga) Retrieve(orchestrator Orchestrator) error {
+func (saga *DeleteSaga) Retrieve(orchestrator Orchestrator) error {
 	return nil
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -12,7 +11,6 @@ import (
 )
 
 func main() {
-	redisAddr := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	serverPort := os.Getenv("USER_PORT")
 	vaultConfig := vault.VaultConfig{
 		Address: os.Getenv("VAULT_ADDR"),
@@ -29,7 +27,7 @@ func main() {
 		Database:   os.Getenv("MYSQL_DATABASE"),
 	}
 
-	err = controller.RunUser(vaultConfig, dbConfig, serverPort, redisAddr)
+	err = controller.RunUser(vaultConfig, dbConfig, serverPort)
 	if err != nil {
 		log.Println("Received error:", err)
 	}
