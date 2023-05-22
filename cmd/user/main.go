@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"strconv"
@@ -27,7 +28,10 @@ func main() {
 		Database:   os.Getenv("MYSQL_DATABASE"),
 	}
 
-	err = controller.RunUser(vaultConfig, dbConfig, serverPort)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	err = controller.RunUser(ctx, vaultConfig, dbConfig, serverPort)
 	if err != nil {
 		log.Println("Received error:", err)
 	}

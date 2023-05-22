@@ -1,25 +1,10 @@
 #!/bin/bash
 
-curl -v -X PUT -H "Authorization: Bearer XXX" -H "Content-Type: application/json" -d '[
-  {
-    "id": 1,
-    "charts": [
-      {
-        "id": 1,
-        "title": "Chart 1B",
-        "description": "test",
-        "data": ""
-      }
-    ],
-    "insights": [
-      {
-        "title": "Insight 1B"
-      }
-    ],
-    "audiences": [
-      {
-        "title": "Audience 1B"
-      }
-    ]
-  }
-]' http://localhost:8080/update
+# Define the JSON file path
+jsonFile="artifacts/asset/update.json"
+
+# Read the JSON content from the file
+jsonContent=$(cat "$jsonFile")
+
+# Make the cURL request with the JSON payload
+curl -v -X PUT -H "Authorization: Bearer XXX" -H "Content-Type: application/json" --data-binary "$jsonContent" http://localhost:8080/update

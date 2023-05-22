@@ -61,6 +61,23 @@ func ReadAudiences(db *sqlx.DB, userID int64) ([]Audience, error) {
 	return items, nil
 }
 
+func ReadAudience(db *sqlx.DB, userID int64, audienceID int64) (Audience, error) {
+	query := `
+		SELECT ` + audiences + `.id, ` + audiences + `.characteristics, ` + assets + `.description
+		FROM ` + audiences + ` 
+		INNER JOIN ` + assets + ` ON ` + audiences + `.assets_id = ` + assets + `.id
+		WHERE ` + assets + `.user_id = ? AND ` + audiences + `.id = ?
+	`
+
+	var item Audience
+	err := db.Get(&item, query, userID, audienceID)
+	if err != nil {
+		return Audience{}, err
+	}
+
+	return item, nil
+}
+
 // UpdateAudience is doing safe update.
 // It update only those field values which are presented in given json
 func UpdateAudience(db *sqlx.DB, audience AudienceSafeUpdate, userID int64) error {
@@ -131,7 +148,7 @@ func DeleteAudience(db *sqlx.DB, userID, audienceID int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("no rows updated on %s table", assets)
+		return fmt.Errorf("no rows deleted on %s table", assets)
 	}
 
 	return nil

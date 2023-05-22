@@ -16,8 +16,8 @@ type User struct {
 }
 
 type UserSafeUpdate struct {
-	ID        int64                 `json:"id"`
-	Name      string                `json:"name"`
+	ID        int64                `json:"id"`
+	Name      string               `json:"name"`
 	Audiences []AudienceSafeUpdate `json:"audiences"`
 	Charts    []ChartSafeUpdate    `json:"charts"`
 	Insights  []InsightSafeUpdate  `json:"insights"`

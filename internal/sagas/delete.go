@@ -43,27 +43,27 @@ func (saga *DeleteSaga) Run(orchestrator Orchestrator) error {
 		}
 		// audiences
 		for _, audience := range user.Audiences {
-			err := models.DeleteAudience(saga.db, audience.ID, user.ID)
+			err := models.DeleteAudience(saga.db, user.ID, audience.ID)
 			if err != nil {
-				log.Println("Error on create audience:", err)
+				log.Println("Error on delete audience:", err)
 				audience.Error = "Database error on audience"
 				respUser.Audiences = append(respUser.Audiences, audience)
 			}
 		}
 		// charts
 		for _, chart := range user.Charts {
-			err := models.DeleteChart(saga.db, chart.ID, user.ID)
+			err := models.DeleteChart(saga.db, user.ID, chart.ID)
 			if err != nil {
-				log.Println("Error on create chart:", err)
+				log.Println("Error on delete chart:", err)
 				chart.Error = "Database error on chart"
 				respUser.Charts = append(respUser.Charts, chart)
 			}
 		}
 		// insights
 		for _, insight := range user.Insights {
-			err := models.DeleteInsight(saga.db, insight.ID, user.ID)
+			err := models.DeleteInsight(saga.db, user.ID, insight.ID)
 			if err != nil {
-				log.Println("Error on update insight:", err)
+				log.Println("Error on delete insight:", err)
 				insight.Error = "Database error on insight"
 				respUser.Insights = append(respUser.Insights, insight)
 			}
@@ -80,7 +80,7 @@ func (saga *DeleteSaga) Run(orchestrator Orchestrator) error {
 	}
 
 	orchestrator.SetResponse(GenericResponse{
-		Format: genericReq.Format,
+		Format: "json",
 		Data:   responseData,
 	})
 

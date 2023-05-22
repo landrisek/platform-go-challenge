@@ -18,11 +18,13 @@ import (
 
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-func TestUser(t *testing.T) {
+func TestRead(t *testing.T) {
 
-	serverPort := "9090"
+	redisAddr := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
+	serverPort := "8093"
 	vaultConfig := vault.VaultConfig{
 		Address: os.Getenv("VAULT_ADDR"),
 		Token:   os.Getenv("VAULT_TOKEN"),
@@ -38,9 +40,10 @@ func TestUser(t *testing.T) {
 		Database:   os.Getenv("MYSQL_DATABASE"),
 	}
 
-	userAddr := fmt.Sprintf("http://localhost:%s", serverPort)
+	assetAddr := fmt.Sprintf("http://localhost:%s", serverPort)
+	blacklistAddr := fmt.Sprintf("http://localhost:%s", os.Getenv("BLACKLIST_PORT"))
 
-	err = cleanupTables(dbConfig, false)
+	requestBody, responseBody, _, err := cleanupTablesWithResponses(dbConfig)
 	if err != nil {
 		t.Fatalf("Cleanup tables failed: %v", err)
 	}
@@ -49,7 +52,7 @@ func TestUser(t *testing.T) {
 
 	// Start the asset server with the mock DB
 	go func() {
-		err := RunUser(ctx, vaultConfig, dbConfig, serverPort)
+		err := RunAsset(ctx, vaultConfig, dbConfig, redisAddr, blacklistAddr, serverPort)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -66,25 +69,27 @@ func TestUser(t *testing.T) {
 		path               string
 		requestBody        string
 		expectedCode       int
+		expectedData       string
 		expectedStatusCode int
 	}{
 		{
-			name:              "success create user",
+			name:              "read assets",
 			method:             http.MethodPost,
 			token:              "XXX",
-			path:               "/create",
-			requestBody:        `{"name": "John Snow"}`,
+			path:               "/read",
+			requestBody:        requestBody,
 			expectedCode:       http.StatusOK,
+			expectedData:       responseBody,
 			expectedStatusCode: http.StatusOK,
 		},
-		{
-			name:               "fail create user",
+		/*{
 			method:             http.MethodPost,
 			token:              "XXX",
 			path:               "/create",
-			requestBody:        "invalid",
+			requestBody:       "empty-create.json",
 			expectedCode:       http.StatusOK,
-			expectedStatusCode: http.StatusBadRequest,
+			expectedData:       `Internal Server Error`,
+			expectedStatusCode: http.StatusInternalServerError,
 		},
 		{
 			method:             http.MethodPost,
@@ -92,8 +97,9 @@ func TestUser(t *testing.T) {
 			path:               "/create",
 			requestBody:        "empty-create.json",
 			expectedCode:       http.StatusUnauthorized,
+			expectedData:       "Unauthorized",
 			expectedStatusCode: http.StatusUnauthorized,
-		},
+		},*/
 	}
 
 	// Iterate over the test cases
@@ -102,7 +108,7 @@ func TestUser(t *testing.T) {
 
 			// Create a request with the test case data
 			requestBody := strings.NewReader(testCase.requestBody)
-			request, err := http.NewRequest(testCase.method, userAddr+testCase.path, requestBody)
+			request, err := http.NewRequest(testCase.method, assetAddr+testCase.path, requestBody)
 			if err != nil {
 				t.Fatalf("Failed to create request: %v", err)
 			}
@@ -121,10 +127,11 @@ func TestUser(t *testing.T) {
 			assert.Equal(t, testCase.expectedStatusCode, response.StatusCode)
 
 			// Optionally, you can read and assert the response body
-			_, err = ioutil.ReadAll(response.Body)
+			responseBody, err := ioutil.ReadAll(response.Body)
 			if err != nil {
 				t.Fatalf("Failed to read response body: %v", err)
 			}
+			assert.Equal(t, testCase.expectedData, strings.TrimSpace(string(responseBody)))
 
 		})
 	}

@@ -147,7 +147,7 @@ func DeleteChart(db *sqlx.DB, userID, chartID int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("no rows updated on %s table", assets)
+		return fmt.Errorf("no rows deletedd on %s table", assets)
 	}
 
 	return nil

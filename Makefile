@@ -26,6 +26,9 @@ help:
 	@echo "make db                          Open local mysql database in terminal"
 	@echo "make redis                       Open local redis database in terminal"
 
+u:
+	./scripts/install-go.sh && ./scripts/test-unit.sh
+
 run-dev:
 	./scripts/install-go.sh && ./scripts/run-dev.sh
 run-asset:
@@ -41,8 +44,8 @@ test-asset:
 	./scripts/install-go.sh && ./scripts/test-asset.sh
 test-blacklist:
 	./scripts/install-go.sh && ./scripts/test-blacklist.sh
-test-usert:
-	./scripts/install-go.sh && ./scripts/test-usert.sh
+test-user:
+	./scripts/install-go.sh && ./scripts/test-user.sh
 
 create-assets:
 	./scripts/install-go.sh && ./scripts/create-assets.sh

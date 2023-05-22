@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -30,8 +31,11 @@ func main() {
 	}
 	blacklistAddr := fmt.Sprintf("http://localhost:%s", os.Getenv("BLACKLIST_PORT"))
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// HINT: in case number of input parameters will increase we will introduce specific structure for them
-	err = controller.RunAsset(vaultConfig, dbConfig, redisAddr, blacklistAddr, serverPort)
+	err = controller.RunAsset(ctx, vaultConfig, dbConfig, redisAddr, blacklistAddr, serverPort)
 	if err != nil {
 		log.Println("Received error:", err)
 	}

@@ -46,7 +46,7 @@ func (saga *UpdateSaga) Run(orchestrator Orchestrator) error {
 		for _, audience := range user.Audiences {
 			err := models.UpdateAudience(saga.db, audience, user.ID)
 			if err != nil {
-				log.Println("Error on create audience:", err)
+				log.Println("Error on update audience:", err)
 				audience.Error = "Database error on audience"
 				respUser.Audiences = append(respUser.Audiences, audience)
 			}
@@ -55,7 +55,7 @@ func (saga *UpdateSaga) Run(orchestrator Orchestrator) error {
 		for _, chart := range user.Charts {
 			err := models.UpdateChart(saga.db, chart, user.ID)
 			if err != nil {
-				log.Println("Error on create chart:", err)
+				log.Println("Error on update chart:", err)
 				chart.Error = "Database error on chart"
 				respUser.Charts = append(respUser.Charts, chart)
 			}
@@ -71,17 +71,17 @@ func (saga *UpdateSaga) Run(orchestrator Orchestrator) error {
 		}
 		if len(respUser.Audiences) > 0 || len(respUser.Charts) > 0 || len(respUser.Insights) > 0 {
 			response = append(response, respUser)
-		}
+		} 
 	}
 
 	responseData, err := json.Marshal(response)
 	if err != nil {
 		log.Println("Error on marshaling error response:", err)
 		return err
-	}
+	}	
 
 	orchestrator.SetResponse(GenericResponse{
-		Format: genericReq.Format,
+		Format: "json",
 		Data:   responseData,
 	})
 

@@ -1,0 +1,25 @@
+[
+    {
+      "id": 1,
+      "charts": [
+        {
+          "id": 1,
+          "title": "Chart 1B",
+          "description": "test",
+          "data": ""
+        }
+      ],
+      "insights": [
+        {
+          "id": 1,
+          "text": "Insight 1B"
+        }
+      ],
+      "audiences": [
+        {
+          "id": 1,
+          "characteristics": "Audience 1B"
+        }
+      ]
+    }
+  ]

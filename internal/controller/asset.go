@@ -20,10 +20,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func RunAsset(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, redisAddr, blacklistAddr, port string) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	
+func RunAsset(ctx context.Context, vaultConfig vault.VaultConfig, dbConfig models.DBConfig, redisAddr, blacklistAddr, port string) error {
 	// redis
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: redisAddr,
@@ -79,7 +76,6 @@ type orchestratorFunc func(sagas.GenericRequest) (sagas.GenericResponse, error)
 
 func Generic(orchestratorFn orchestratorFunc, db *sqlx.DB, permission string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Println("---------Generic-----------")
 		err := Authenticate(request.Header, db, permission)
 		if err != nil {
 			http.Error(writer, "Unauthorized", http.StatusUnauthorized)
@@ -99,7 +95,7 @@ func Generic(orchestratorFn orchestratorFunc, db *sqlx.DB, permission string) ht
 		// Unmarshal the JSON body into the GenericRequest struct
 		err = json.Unmarshal(body, &genericReq.Data)
 		if err != nil {
-			log.Println("Error on unmarshaling request: ", err)
+			log.Println("Error on unmarshaling request in generics: ", err)
 			http.Error(writer, "Bad Request", http.StatusBadRequest)
 			return
 		}

@@ -2,7 +2,7 @@
 
 curl -v -X DELETE -H "Authorization: Bearer XXX" -H "Content-Type: application/json" -d '[
   {
-    "id": 1,
+    "id": 28,
     "charts": [
       {
         "id": 1
@@ -15,7 +15,7 @@ curl -v -X DELETE -H "Authorization: Bearer XXX" -H "Content-Type: application/j
     ],
     "audiences": [
       {
-        "id": 1
+        "id": 80
       }
     ]
   }

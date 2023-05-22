@@ -66,14 +66,14 @@ func (saga *ReadSaga) Run(orchestrator Orchestrator) error {
 	}
 	user.Insights = insights
 
-	responseData, err := json.Marshal(user)
+	responseData, err := json.Marshal([]models.User{user})
 	if err != nil {
 		log.Println("Error on marshaling error response:", err)
 		return err
 	}
 
 	orchestrator.SetResponse(GenericResponse{
-		Format: genericReq.Format,
+		Format: "json",
 		Data:   responseData,
 	})
 

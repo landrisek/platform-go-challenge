@@ -86,7 +86,7 @@ func (saga *CreateSaga) Run(orchestrator Orchestrator) error {
 	}
 
 	orchestrator.SetResponse(GenericResponse{
-		Format: genericReq.Format,
+		Format: "json",
 		Data:   responseData,
 	})
 

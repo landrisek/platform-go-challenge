@@ -22,9 +22,7 @@ type CRUD struct {
 	db    *sqlx.DB
 }
 
-func RunUser(vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port string) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func RunUser(ctx context.Context, vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port string) error {
 	
 	// sql
 	db, err := models.OpenDB(vaultConfig, dbConfig)
@@ -87,12 +85,9 @@ func (crud CRUD) Create(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	user.ID = userID
 	// Encode the response as JSON
-	responseJSON, err := json.Marshal(struct {
-		UserID int64 `json:"user_id"`
-	}{
-		UserID: userID,
-	})
+	responseJSON, err := json.Marshal(user)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return

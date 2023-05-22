@@ -128,7 +128,7 @@ func DeleteInsight(db *sqlx.DB, userID, insightID int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("no rows updated on %s table", assets)
+		return fmt.Errorf("no rows deleted on %s table", assets)
 	}
 
 	return nil
