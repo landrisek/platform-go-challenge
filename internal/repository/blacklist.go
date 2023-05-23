@@ -33,7 +33,7 @@ func findBlacklist(ctx context.Context, client *redis.Client, data []models.User
 	for key := range data {
 		user := &data[key]
 		wg.Add(1)
-		go func() {
+		go func(user *models.User) {
 			defer wg.Done()
 			sem <- struct{}{} // Acquire a semaphore slot
 			blacklistAssets(ctx, client, user, errChan)
