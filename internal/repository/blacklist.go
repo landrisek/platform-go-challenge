@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/go-redis/redis"
+	"github.com/landrisek/platform-go-challenge/internal/models"
 )
 
 const blacklistPrefix = "blacklist"

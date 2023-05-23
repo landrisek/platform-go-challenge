@@ -12,5 +12,5 @@ if [ -f "$ENV_FILE" ]; then
   done < "$ENV_FILE"
 fi
 
-# TODO: implement tags instead
-go test -v -run  TestBlacklist -tags=integration  ./internal/controller
+go test -count=1 -tags=database ./internal/models -v
+go test -count=1 -tags=database ./internal/repository -v

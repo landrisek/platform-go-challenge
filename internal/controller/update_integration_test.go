@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package controller
@@ -17,9 +18,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestUpdate(t *testing.T) {
@@ -29,16 +30,16 @@ func TestUpdate(t *testing.T) {
 	vaultConfig := vault.VaultConfig{
 		Address: os.Getenv("VAULT_ADDR"),
 		Token:   os.Getenv("VAULT_TOKEN"),
-		Mount: os.Getenv("VAULT_MOUNT"),
+		Mount:   os.Getenv("VAULT_MOUNT"),
 	}
 	port, err := strconv.Atoi(os.Getenv("MYSQL_PORT"))
 	if err != nil {
 		log.Fatalf("Invalid port: %v", err)
 	}
 	dbConfig := models.DBConfig{
-		Host:       os.Getenv("MYSQL_HOST"),
-		Port:       port,
-		Database:   os.Getenv("MYSQL_DATABASE"),
+		Host:     os.Getenv("MYSQL_HOST"),
+		Port:     port,
+		Database: os.Getenv("MYSQL_DATABASE"),
 	}
 
 	assetAddr := fmt.Sprintf("http://localhost:%s", serverPort)
@@ -69,7 +70,6 @@ func TestUpdate(t *testing.T) {
 		token              string
 		path               string
 		requestBody        string
-		expectedCode       int
 		expectedData       string
 		expectedStatusCode int
 	}{
@@ -79,7 +79,6 @@ func TestUpdate(t *testing.T) {
 			token:              "XXX",
 			path:               "/update",
 			requestBody:        requestBody,
-			expectedCode:       http.StatusOK,
 			expectedData:       `{"format":"json","data":null}`,
 			expectedStatusCode: http.StatusOK,
 		},
@@ -89,7 +88,6 @@ func TestUpdate(t *testing.T) {
 			token:              "XXX",
 			path:               "/update",
 			requestBody:        `{"format": "json", "data": {"id": 2, "name": "Updated Name"}}`,
-			expectedCode:       http.StatusOK,
 			expectedData:       `Internal Server Error`,
 			expectedStatusCode: http.StatusInternalServerError,
 		},
@@ -99,7 +97,6 @@ func TestUpdate(t *testing.T) {
 			token:              "XXX",
 			path:               "/update",
 			requestBody:        `[{"format":"json","data":{"id":2,"name":"Updated Name"}}]`,
-			expectedCode:       http.StatusOK,
 			expectedData:       `{"format":"json","data":null}`,
 			expectedStatusCode: http.StatusOK,
 		},
@@ -109,7 +106,6 @@ func TestUpdate(t *testing.T) {
 			token:              "XXX",
 			path:               "/update",
 			requestBody:        requestBody,
-			expectedCode:       http.StatusOK,
 			expectedData:       errorResponseBody,
 			expectedStatusCode: http.StatusOK,
 		},
@@ -190,13 +186,13 @@ func cleanupTablesWithResponses(dbConfig models.DBConfig) (string, string, strin
 	if err != nil {
 		return "", "", "", err
 	}
-	
+
 	// Retrieve the chart ID
 	chartID, err := res.LastInsertId()
 	if err != nil {
 		return "", "", "", err
 	}
-	
+
 	// Insert an insight
 	res, err = db.Exec("INSERT INTO assets (user_id, type, description) VALUES (?, 'insights', 'Insight 1A')", userID)
 	if err != nil {
@@ -236,13 +232,13 @@ func cleanupTablesWithResponses(dbConfig models.DBConfig) (string, string, strin
 	if err != nil {
 		return "", "", "", err
 	}
-	
+
 	// Retrieve the audience ID
 	audienceID, err := res.LastInsertId()
 	if err != nil {
 		return "", "", "", err
 	}
-	
+
 	// Construct the JSON body
 	request := fmt.Sprintf(`[
 		{
@@ -269,7 +265,7 @@ func cleanupTablesWithResponses(dbConfig models.DBConfig) (string, string, strin
 			]
 		}
 	]`, userID, chartID, insightID, audienceID)
-	
+
 	response := fmt.Sprintf(`{"format":"json","data":[{"id":%d,"name":"","audiences":[{"id":%d,"characteristics":"Audience 1A","description":"Audience 1A","error":""}],"charts":[{"id":%d,"description":"Chart 1A","error":"","AssetID":0}],"insights":[{"id":%d,"text":"Insight 1A","description":"Insight 1A","error":""}]}]}`, userID, audienceID, chartID, insightID)
 
 	errorResponse := fmt.Sprintf(`{"format":"json","data":[{"id":%d,"name":"","audiences":[{"id":%d,"characteristics":"Audience 1B","error":"Database error on audience"}],"charts":[{"id":%d,"title":"Chart 1B","data":"","description":"test","error":"Database error on chart","AssetID":0}],"insights":[{"id":%d,"text":"Insight 1B","description":null,"error":"Database error on insight"}]}]}`, userID, chartID, insightID, audienceID)

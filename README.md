@@ -23,15 +23,15 @@ In a typical scenario, each microservice would have its own repository, allowing
 By adopting this approach, we can optimize development speed, resource utilization, and collaboration while ensuring that each microservice remains decoupled and independently deployable.
 
 General recommended approach (and base for end-to-end test) is (should be self-explanaible, check make help for more info):
-1] make run-dev (wait until finish)
-2] make create-user (after fully user microservice standup, can be postpone by provisioning)
-3] make run-asset (in separate terminal)
-4] make create-asset
-5] make read-assets
-6] make update-asset
-7] make read-asset
-8] make delete-asset
-9] make read-asset
+1] make run-dev (wait until finish)<br>
+2] make create-user (after fully user microservice standup, can be postpone by provisioning)<br>
+3] make run-asset (in separate terminal)<br>
+4] make create-assets<br>
+5] make read-assets<br>
+6] make update-assets<br>
+7] make read-assets<br>
+8] make delete-assets<br>
+9] make read-asset<br>
 
 ## Code and comments
 
@@ -92,4 +92,9 @@ For authentication was used simple token stored both in redis and mysql. Crud pe
 
 ## Tests
 
-Last, but not least. For maintaing tests are used tags: you can run unit, integration, dedicated to specific microservice (asset, blacklist, user) and one end-to-end-test (for this whole local development needs to be running and for cloud solution infractructure stand up will be part of pipeline).
+Last, but not least. For maintaing tests are used tags: you can run unit, integration, database (integration) and one end-to-end-test. Except of unit tests needs local development to be running. For cloud solution infractructure stand up will be part of pipeline.
+We acknowledge that while some unit tests and database integration tests were proposed, they were not fully implemented in the current stage of the project. It is worth noting that the proposed tests were designed to be generic in nature, and considering the comprehensive coverage achieved through integration and end-to-end testing of the complete functionality, the cost of maintaining these additional tests could be questionable.
+
+However, it is important to emphasize that as the internal packages are planned to be distributed independently through an internal proxy, it becomes crucial to have separate tests for these packages. These tests would ensure the reliability and compatibility of the distributed packages and would be an absolute necessity in that context.
+
+Overall, the decision to prioritize comprehensive integration and end-to-end testing, while deferring certain unit and database integration tests, was made with consideration for the project's timeline, resources, and the relative importance of each test type in the context of the system architecture.

@@ -2,26 +2,26 @@ package models
 
 import (
 	"fmt"
-	
+
 	"github.com/jmoiron/sqlx"
 )
 
 type Audience struct {
-	ID              int64   `db:"id"               json:"id"`
+	ID              int64  `db:"id"               json:"id"`
 	Characteristics string `db:"characteristics" json:"characteristics,omitempty"`
 	// this will be not inserted in DB directly
-	Description     string `json:"description,omitempty"`
-	Error           string  `json:"error"`
+	Description string `json:"description,omitempty"`
+	Error       string `json:"error"`
 }
 
-// structure with pointer was created to use heap memory 
+// structure with pointer was created to use heap memory
 // where it is usefull - to omit not provided values
 type AudienceSafeUpdate struct {
 	ID              int64   `db:"id"               json:"id"`
 	Characteristics *string `db:"characteristics" json:"characteristics,omitempty"`
 	// this will be not inserted in DB directly
-	Description     *string `json:"description,omitempty"`
-	Error           string  `json:"error"`
+	Description *string `json:"description,omitempty"`
+	Error       string  `json:"error"`
 }
 
 const audiences = "audiences"
@@ -29,8 +29,8 @@ const audiences = "audiences"
 func CreateAudience(db *sqlx.DB, audience Audience, userID int64) error {
 	assetID, err := createAsset(db, Asset{
 		Description: audience.Description,
-		Type: audiences,
-		UserID: userID,
+		Type:        audiences,
+		UserID:      userID,
 	})
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func UpdateAudience(db *sqlx.DB, audience AudienceSafeUpdate, userID int64) erro
 	if updateFields == "" {
 		return fmt.Errorf("Audience with no valid attribute was provided")
 	}
-	
+
 	// remove last comma
 	updateFields = updateFields[:len(updateFields)-2]
 

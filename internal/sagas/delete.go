@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/landrisek/platform-go-challenge/internal/models"
 )
 
 type DeleteSaga struct {
@@ -38,7 +38,7 @@ func (saga *DeleteSaga) Run(orchestrator Orchestrator) error {
 
 	for _, user := range users {
 		respUser := models.User{
-			ID: user.ID,
+			ID:   user.ID,
 			Name: user.Name,
 		}
 		// audiences

@@ -1,8 +1,8 @@
 package sagas
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/landrisek/platform-go-challenge/internal/models"
@@ -19,7 +19,7 @@ type ReadSaga struct {
 
 func NewReadSaga(db *sqlx.DB, client *redis.Client) *ReadSaga {
 	return &ReadSaga{
-		db: db,
+		db:     db,
 		client: client,
 	}
 }
@@ -48,19 +48,19 @@ func (saga *ReadSaga) Run(orchestrator Orchestrator) error {
 	}
 
 	user := users[0]
-	audiences, err :=  models.ReadAudiences(saga.db, user.ID)
+	audiences, err := models.ReadAudiences(saga.db, user.ID)
 	if err != nil {
 		return err
 	}
 	user.Audiences = audiences
 
-	charts, err :=  models.ReadCharts(saga.db, user.ID)
+	charts, err := models.ReadCharts(saga.db, user.ID)
 	if err != nil {
 		return err
 	}
 	user.Charts = charts
 
-	insights, err :=  models.ReadInsights(saga.db, user.ID)
+	insights, err := models.ReadInsights(saga.db, user.ID)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,6 @@ func (saga *ReadSaga) Run(orchestrator Orchestrator) error {
 
 	return nil
 }
-
 
 func (saga *ReadSaga) Retrieve(orchestrator Orchestrator) error {
 	return nil

@@ -7,21 +7,21 @@ import (
 )
 
 type Chart struct {
-	ID          int64   `db:"id"          json:"id"`
-	Title       string `db:"title"       json:"title,omitempty"`
-	AxesTitles  string `db:"axes_titles" json:"axes_titles,omitempty"`
-	Data        string `db:"data"        json:"data,omitempty"`
+	ID         int64  `db:"id"          json:"id"`
+	Title      string `db:"title"       json:"title,omitempty"`
+	AxesTitles string `db:"axes_titles" json:"axes_titles,omitempty"`
+	Data       string `db:"data"        json:"data,omitempty"`
 	// this will be not inserted in DB directly
 	Description string `json:"description"`
-	Error       string  `json:"error"`
-	AssetID     int64   `db:"asset_id"`
+	Error       string `json:"error"`
+	AssetID     int64  `db:"asset_id"`
 }
 
 type ChartSafeUpdate struct {
-	ID          int64   `db:"id"          json:"id"`
-	Title       *string `db:"title"       json:"title,omitempty"`
-	AxesTitles  *string `db:"axes_titles" json:"axes_titles,omitempty"`
-	Data        *string `db:"data"        json:"data,omitempty"`
+	ID         int64   `db:"id"          json:"id"`
+	Title      *string `db:"title"       json:"title,omitempty"`
+	AxesTitles *string `db:"axes_titles" json:"axes_titles,omitempty"`
+	Data       *string `db:"data"        json:"data,omitempty"`
 	// this will be not inserted in DB directly
 	Description *string `json:"description"`
 	Error       string  `json:"error"`
@@ -33,8 +33,8 @@ const charts = "charts"
 func CreateChart(db *sqlx.DB, chart Chart, userID int64) error {
 	assetID, err := createAsset(db, Asset{
 		Description: chart.Description,
-		Type: charts,
-		UserID: userID,
+		Type:        charts,
+		UserID:      userID,
 	})
 	if err != nil {
 		return err
@@ -65,7 +65,6 @@ func ReadCharts(db *sqlx.DB, userID int64) ([]Chart, error) {
 	return items, nil
 }
 
-
 // UpdateChart is doing safe update.
 // It update only those field values which are presented in given json
 func UpdateChart(db *sqlx.DB, chart ChartSafeUpdate, userID int64) error {
@@ -84,7 +83,7 @@ func UpdateChart(db *sqlx.DB, chart ChartSafeUpdate, userID int64) error {
 	}
 
 	if chart.Data != nil {
-		updateFields +=charts + ".data = ?, "
+		updateFields += charts + ".data = ?, "
 		updateValues = append(updateValues, *chart.Data)
 	}
 

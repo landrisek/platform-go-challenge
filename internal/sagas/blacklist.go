@@ -25,13 +25,13 @@ func (saga *BlacklistSaga) Run(orchestrator Orchestrator) error {
 		return fmt.Errorf("Error sending HTTP request: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	// Read the response body
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("Error reading response body: %v", err)
 	}
-	
+
 	// Process the response
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Error response: %s", resp.Status)
@@ -40,11 +40,10 @@ func (saga *BlacklistSaga) Run(orchestrator Orchestrator) error {
 	genericReq.Data = respBody
 	// blacklisted request is set for following processing
 	orchestrator.SetRequest(genericReq)
-	
+
 	return nil
 }
 
 func (saga *BlacklistSaga) Retrieve(orchestrator Orchestrator) error {
 	return nil
 }
-

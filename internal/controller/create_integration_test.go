@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package controller
@@ -17,9 +18,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestCreate(t *testing.T) {
@@ -29,16 +30,16 @@ func TestCreate(t *testing.T) {
 	vaultConfig := vault.VaultConfig{
 		Address: os.Getenv("VAULT_ADDR"),
 		Token:   os.Getenv("VAULT_TOKEN"),
-		Mount: os.Getenv("VAULT_MOUNT"),
+		Mount:   os.Getenv("VAULT_MOUNT"),
 	}
 	port, err := strconv.Atoi(os.Getenv("MYSQL_PORT"))
 	if err != nil {
 		log.Fatalf("Invalid port: %v", err)
 	}
 	dbConfig := models.DBConfig{
-		Host:       os.Getenv("MYSQL_HOST"),
-		Port:       port,
-		Database:   os.Getenv("MYSQL_DATABASE"),
+		Host:     os.Getenv("MYSQL_HOST"),
+		Port:     port,
+		Database: os.Getenv("MYSQL_DATABASE"),
 	}
 
 	assetAddr := fmt.Sprintf("http://localhost:%s", serverPort)
@@ -70,17 +71,15 @@ func TestCreate(t *testing.T) {
 		token              string
 		path               string
 		requestBody        string
-		expectedCode       int
 		expectedData       string
 		expectedStatusCode int
 	}{
 		{
-			name:              "create assets",
+			name:               "create assets",
 			method:             http.MethodPost,
 			token:              "XXX",
 			path:               "/create",
 			requestBody:        "create.json",
-			expectedCode:       http.StatusOK,
 			expectedData:       `{"format":"json","data":null}`,
 			expectedStatusCode: http.StatusOK,
 		},
@@ -88,8 +87,7 @@ func TestCreate(t *testing.T) {
 			method:             http.MethodPost,
 			token:              "XXX",
 			path:               "/create",
-			requestBody:       "empty-create.json",
-			expectedCode:       http.StatusOK,
+			requestBody:        "empty-create.json",
 			expectedData:       `Internal Server Error`,
 			expectedStatusCode: http.StatusInternalServerError,
 		},
@@ -98,7 +96,6 @@ func TestCreate(t *testing.T) {
 			token:              "YYY",
 			path:               "/create",
 			requestBody:        "empty-create.json",
-			expectedCode:       http.StatusUnauthorized,
 			expectedData:       "Unauthorized",
 			expectedStatusCode: http.StatusUnauthorized,
 		},
@@ -148,19 +145,19 @@ func TestCreate(t *testing.T) {
 func cleanupTables(dbConfig models.DBConfig, withUser bool) error {
 	// Create the database connection string
 	// HINT: Here we are using DB connection without vault, directly taken from env variables
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", os.Getenv("MYSQL_USER"), 
-														os.Getenv("MYSQL_PASSWORD"),
-														dbConfig.Host, 
-														dbConfig.Port,
-														dbConfig.Database)
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", os.Getenv("MYSQL_USER"),
+		os.Getenv("MYSQL_PASSWORD"),
+		dbConfig.Host,
+		dbConfig.Port,
+		dbConfig.Database)
 	// Connect to the database
 	db, err := sql.Open("mysql", dataSourceName)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
-		
-	// Clean up assets table 
+
+	// Clean up assets table
 	// DELETE ON CASCADE should cleanup all underlying
 	_, err = db.Exec("DELETE FROM assets")
 	if err != nil {
@@ -180,6 +177,6 @@ func cleanupTables(dbConfig models.DBConfig, withUser bool) error {
 			return err
 		}
 	}
-	
+
 	return nil
 }

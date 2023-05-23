@@ -39,7 +39,7 @@ func (saga *UpdateSaga) Run(orchestrator Orchestrator) error {
 
 	for _, user := range users {
 		respUser := models.UserSafeUpdate{
-			ID: user.ID,
+			ID:   user.ID,
 			Name: user.Name,
 		}
 		// audiences
@@ -71,14 +71,14 @@ func (saga *UpdateSaga) Run(orchestrator Orchestrator) error {
 		}
 		if len(respUser.Audiences) > 0 || len(respUser.Charts) > 0 || len(respUser.Insights) > 0 {
 			response = append(response, respUser)
-		} 
+		}
 	}
 
 	responseData, err := json.Marshal(response)
 	if err != nil {
 		log.Println("Error on marshaling error response:", err)
 		return err
-	}	
+	}
 
 	orchestrator.SetResponse(GenericResponse{
 		Format: "json",
@@ -87,7 +87,6 @@ func (saga *UpdateSaga) Run(orchestrator Orchestrator) error {
 
 	return nil
 }
-
 
 func (saga *UpdateSaga) Retrieve(orchestrator Orchestrator) error {
 	return nil

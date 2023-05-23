@@ -13,3 +13,4 @@ if [ -f "$ENV_FILE" ]; then
 fi
 
 go test -count=1 -tags=integration ./internal/controller -v
+go test -count=1 -tags=integration ./internal/vault -v

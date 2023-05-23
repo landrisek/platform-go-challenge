@@ -1,8 +1,8 @@
 package vault
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/hashicorp/vault/api"
@@ -27,7 +27,7 @@ type VaultData struct {
 }
 
 // HINT: Redundant, left here for broader discussion on in-build cli vs. in-build request
-// which are more or less same 
+// which are more or less same
 func GetSQLCredentialsWithCLI(vaultConfig VaultConfig) (map[string]string, error) {
 	// Create a new Vault client
 	client, err := api.NewClient(&api.Config{
@@ -63,7 +63,7 @@ func GetSQLCredentialsWithCLI(vaultConfig VaultConfig) (map[string]string, error
 // GetSQLCredentials retrieves SQL credentials from Vault
 // HINT: curl --header "X-Vault-Token: myroot" --request GET  http://vault:8200/v1/mysql_sandbox/creds/sudo
 func GetSQLCredentials(vaultConfig VaultConfig) (map[string]string, error) {
-	req, err := http.NewRequest(http.MethodGet, vaultConfig.Address + "/v1/" + vaultConfig.Mount + "/creds/sudo", nil)
+	req, err := http.NewRequest(http.MethodGet, vaultConfig.Address+"/v1/"+vaultConfig.Mount+"/creds/sudo", nil)
 	if err != nil {
 		return nil, err
 	}

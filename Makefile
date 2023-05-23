@@ -7,8 +7,9 @@ help:
 	@echo "make run-asset                   Run asset microservice"
 
 	@echo "make test-unit                   Run test unit suite for all microservices"
-	@echo "make test-integration            Run test integration suite for all microservices"
-	@echo "make test-end2end              Run end to end test integration suite for main microservices scenario (you need to have running local environment for this)"
+	@echo "make test-integration            Run test integration suite for all microservices (you need to have running local environment for this)"
+	@echo "make test-database               Run test database integration suite for all microservices (you need to have running local environment for this)"
+	@echo "make test-end2end                Run end to end test integration suite for main microservices scenario (you need to have running local environment for this)"
 	@echo "make test-asset                  Run all the test for asset microservice"
 	@echo "make test-blacklist              Run all the test for blacklist microservice"
 	@echo "make test-user                   Run all the test for user microservice"
@@ -26,9 +27,6 @@ help:
 	@echo "make db                          Open local mysql database in terminal"
 	@echo "make redis                       Open local redis database in terminal"
 
-u:
-	./scripts/install-go.sh && ./scripts/test-unit.sh
-
 run-dev:
 	./scripts/install-go.sh && ./scripts/run-dev.sh
 run-asset:
@@ -38,6 +36,8 @@ test-unit:
 	./scripts/install-go.sh && ./scripts/test-unit.sh
 test-integration:
 	./scripts/install-go.sh && ./scripts/test-integration.sh
+test-database:
+	./scripts/install-go.sh && ./scripts/test-database.sh
 test-end2end:
 	./scripts/install-go.sh && ./scripts/test-end2end.sh
 test-asset:

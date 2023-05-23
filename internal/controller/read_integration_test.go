@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package controller
@@ -16,9 +17,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestRead(t *testing.T) {
@@ -28,16 +29,16 @@ func TestRead(t *testing.T) {
 	vaultConfig := vault.VaultConfig{
 		Address: os.Getenv("VAULT_ADDR"),
 		Token:   os.Getenv("VAULT_TOKEN"),
-		Mount: os.Getenv("VAULT_MOUNT"),
+		Mount:   os.Getenv("VAULT_MOUNT"),
 	}
 	port, err := strconv.Atoi(os.Getenv("MYSQL_PORT"))
 	if err != nil {
 		log.Fatalf("Invalid port: %v", err)
 	}
 	dbConfig := models.DBConfig{
-		Host:       os.Getenv("MYSQL_HOST"),
-		Port:       port,
-		Database:   os.Getenv("MYSQL_DATABASE"),
+		Host:     os.Getenv("MYSQL_HOST"),
+		Port:     port,
+		Database: os.Getenv("MYSQL_DATABASE"),
 	}
 
 	assetAddr := fmt.Sprintf("http://localhost:%s", serverPort)
@@ -68,38 +69,35 @@ func TestRead(t *testing.T) {
 		token              string
 		path               string
 		requestBody        string
-		expectedCode       int
 		expectedData       string
 		expectedStatusCode int
 	}{
 		{
-			name:              "read assets",
+			name:               "success read assets",
 			method:             http.MethodPost,
 			token:              "XXX",
 			path:               "/read",
 			requestBody:        requestBody,
-			expectedCode:       http.StatusOK,
 			expectedData:       responseBody,
 			expectedStatusCode: http.StatusOK,
 		},
-		/*{
+		{
+			name:               "fail read assets",
 			method:             http.MethodPost,
 			token:              "XXX",
 			path:               "/create",
-			requestBody:       "empty-create.json",
-			expectedCode:       http.StatusOK,
-			expectedData:       `Internal Server Error`,
-			expectedStatusCode: http.StatusInternalServerError,
+			requestBody:        `{}]`,
+			expectedData:       `Bad Request`,
+			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
 			method:             http.MethodPost,
 			token:              "YYY",
 			path:               "/create",
 			requestBody:        "empty-create.json",
-			expectedCode:       http.StatusUnauthorized,
 			expectedData:       "Unauthorized",
 			expectedStatusCode: http.StatusUnauthorized,
-		},*/
+		},
 	}
 
 	// Iterate over the test cases

@@ -1,1 +1,2 @@
 artifacts/server/server
+internal/controller/test.db

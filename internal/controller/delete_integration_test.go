@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package controller
@@ -16,9 +17,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestDelete(t *testing.T) {
@@ -69,18 +70,16 @@ func TestDelete(t *testing.T) {
 		token              string
 		path               string
 		requestBody        string
-		expectedCode       int
 		expectedData       string
 		expectedStatusCode int
 	}{
 		{
-			name:              "delete assets",
-			method:            http.MethodDelete,
-			token:             "XXX",
-			path:              "/delete",
-			requestBody:       requestBody,
-			expectedCode:      http.StatusOK,
-			expectedData:      `{"format":"json","data":null}`,
+			name:               "delete assets",
+			method:             http.MethodDelete,
+			token:              "XXX",
+			path:               "/delete",
+			requestBody:        requestBody,
+			expectedData:       `{"format":"json","data":null}`,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
@@ -89,30 +88,27 @@ func TestDelete(t *testing.T) {
 			token:              "XXX",
 			path:               "/delete",
 			requestBody:        `[{"format":"json","data":{}}]`,
-			expectedCode:       http.StatusOK,
 			expectedData:       `{"format":"json","data":null}`,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
-			name:               "delete wiht incorrec fortmat assets",
+			name:               "delete wiht incorrect fortmat assets",
 			method:             http.MethodDelete,
 			token:              "XXX",
 			path:               "/delete",
 			requestBody:        `{"format":"json","data":{}}`,
-			expectedCode:       http.StatusOK,
 			expectedData:       `Internal Server Error`,
 			expectedStatusCode: http.StatusInternalServerError,
 		},
-		/*{
+		{
 			name:               "delete with incorrect token",
 			method:             http.MethodDelete,
 			token:              "YYY",
 			path:               "/delete",
-			requestBody:        "empty-delete.json",
-			expectedCode:       http.StatusUnauthorized,
+			requestBody:        `[{"format":"json","data":{}}]`,
 			expectedData:       "Unauthorized",
 			expectedStatusCode: http.StatusUnauthorized,
-		},*/
+		},
 	}
 	// Iterate over the test cases
 	for _, testCase := range testCases {

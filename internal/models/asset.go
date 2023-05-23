@@ -11,7 +11,7 @@ type Asset struct {
 	Description string `db:"description"`
 	Type        string `db:"type"`
 	// FK
-	UserID      int64  `db:"user_id"`
+	UserID int64 `db:"user_id"`
 }
 
 type AssetDescription string

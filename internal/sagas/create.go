@@ -44,7 +44,7 @@ func (saga *CreateSaga) Run(orchestrator Orchestrator) error {
 
 	for _, user := range users {
 		respUser := models.User{
-			ID: user.ID,
+			ID:   user.ID,
 			Name: user.Name,
 		}
 		// audiences

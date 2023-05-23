@@ -3,8 +3,8 @@ package models
 import (
 	"fmt"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 type Permission struct {
@@ -12,7 +12,7 @@ type Permission struct {
 	Token  string `db:"token"`
 	Create bool   `db:"create"`
 	Read   bool   `db:"read"`
-	Update  bool  `db:"update"`
+	Update bool   `db:"update"`
 	Delete bool   `db:"delete"`
 }
 

@@ -13,17 +13,17 @@ import (
 	"github.com/landrisek/platform-go-challenge/internal/models"
 	"github.com/landrisek/platform-go-challenge/internal/vault"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type CRUD struct {
-	db    *sqlx.DB
+	db *sqlx.DB
 }
 
 func RunUser(ctx context.Context, vaultConfig vault.VaultConfig, dbConfig models.DBConfig, port string) error {
-	
+
 	// sql
 	db, err := models.OpenDB(vaultConfig, dbConfig)
 	if err != nil {
@@ -32,7 +32,7 @@ func RunUser(ctx context.Context, vaultConfig vault.VaultConfig, dbConfig models
 
 	// user handler
 	crud := CRUD{
-		db:    db,
+		db: db,
 	}
 
 	router := mux.NewRouter()
@@ -71,7 +71,7 @@ func (crud CRUD) Create(writer http.ResponseWriter, request *http.Request) {
 	err := Authenticate(request.Header, crud.db, "create")
 	if err != nil {
 		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
-		return	
+		return
 	}
 	var user models.User
 	err = json.NewDecoder(request.Body).Decode(&user)

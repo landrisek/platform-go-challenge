@@ -79,7 +79,7 @@ func Generic(orchestratorFn orchestratorFunc, db *sqlx.DB, permission string) ht
 		err := Authenticate(request.Header, db, permission)
 		if err != nil {
 			http.Error(writer, "Unauthorized", http.StatusUnauthorized)
-			return	
+			return
 		}
 		// Read the request body
 		body, err := ioutil.ReadAll(request.Body)
@@ -88,10 +88,10 @@ func Generic(orchestratorFn orchestratorFunc, db *sqlx.DB, permission string) ht
 			http.Error(writer, "Bad Request", http.StatusBadRequest)
 			return
 		}
-		
+
 		// Create a new GenericRequest instance
 		var genericReq sagas.GenericRequest
-		
+
 		// Unmarshal the JSON body into the GenericRequest struct
 		err = json.Unmarshal(body, &genericReq.Data)
 		if err != nil {
@@ -127,7 +127,7 @@ func Generic(orchestratorFn orchestratorFunc, db *sqlx.DB, permission string) ht
 			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		
+
 	}
 }
 

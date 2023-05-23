@@ -2,21 +2,21 @@ package models
 
 import (
 	"fmt"
-	
+
 	"github.com/jmoiron/sqlx"
 )
 
 type Insight struct {
-	ID          int64   `db:"id"          json:"id"`
-	Text        string `db:"text"        json:"text"`
+	ID   int64  `db:"id"          json:"id"`
+	Text string `db:"text"        json:"text"`
 	// this will be not inserted in DB directly
 	Description string `json:"description"`
-	Error       string  `json:"error"`
+	Error       string `json:"error"`
 }
 
 type InsightSafeUpdate struct {
-	ID          int64   `db:"id"          json:"id"`
-	Text        *string `db:"text"        json:"text"`
+	ID   int64   `db:"id"          json:"id"`
+	Text *string `db:"text"        json:"text"`
 	// this will be not inserted in DB directly
 	Description *string `json:"description"`
 	Error       string  `json:"error"`
@@ -29,8 +29,8 @@ const insights = "insights"
 func CreateInsight(db *sqlx.DB, insight Insight, userID int64) error {
 	assetID, err := createAsset(db, Asset{
 		Description: insight.Description,
-		Type: insights,
-		UserID: userID,
+		Type:        insights,
+		UserID:      userID,
 	})
 	if err != nil {
 		return err
@@ -59,6 +59,7 @@ func ReadInsights(db *sqlx.DB, userID int64) ([]Insight, error) {
 
 	return items, nil
 }
+
 // UpdateInsight is doing safe update.
 // It update only those field values which are presented in given json
 func UpdateInsight(db *sqlx.DB, insight InsightSafeUpdate, userID int64) error {

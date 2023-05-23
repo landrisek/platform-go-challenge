@@ -1,3 +1,4 @@
+//go:build end2end
 // +build end2end
 
 package controller
@@ -33,16 +34,16 @@ func TestAsset(t *testing.T) {
 	vaultConfig := vault.VaultConfig{
 		Address: os.Getenv("VAULT_ADDR"),
 		Token:   os.Getenv("VAULT_TOKEN"),
-		Mount: os.Getenv("VAULT_MOUNT"),
+		Mount:   os.Getenv("VAULT_MOUNT"),
 	}
 	port, err := strconv.Atoi(os.Getenv("MYSQL_PORT"))
 	if err != nil {
 		log.Fatalf("Invalid port: %v", err)
 	}
 	dbConfig := models.DBConfig{
-		Host:       os.Getenv("MYSQL_HOST"),
-		Port:       port,
-		Database:   os.Getenv("MYSQL_DATABASE"),
+		Host:     os.Getenv("MYSQL_HOST"),
+		Port:     port,
+		Database: os.Getenv("MYSQL_DATABASE"),
 	}
 
 	assetAddr := fmt.Sprintf("http://localhost:%s", serverPort)
@@ -51,11 +52,11 @@ func TestAsset(t *testing.T) {
 
 	// Create the database connection string
 	// HINT: Here we are using DB connection without vault, directly taken from env variables
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", os.Getenv("MYSQL_USER"), 
-														os.Getenv("MYSQL_PASSWORD"),
-														dbConfig.Host, 
-														dbConfig.Port,
-														dbConfig.Database)
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", os.Getenv("MYSQL_USER"),
+		os.Getenv("MYSQL_PASSWORD"),
+		dbConfig.Host,
+		dbConfig.Port,
+		dbConfig.Database)
 	// Connect to the database
 	db, err := sqlx.Open("mysql", dataSourceName)
 	if err != nil {
@@ -105,27 +106,27 @@ func TestAsset(t *testing.T) {
 			name:               "create user",
 			method:             http.MethodPost,
 			token:              token,
-			path:               userAddr+"/create",
+			path:               userAddr + "/create",
 			requestBody:        user,
 			expectedCode:       http.StatusOK,
 			expectedData:       checkUser,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
-			name:              "create assets",
+			name:               "create assets",
 			method:             http.MethodPost,
 			token:              token,
-			path:               assetAddr+"/create",
+			path:               assetAddr + "/create",
 			requestBody:        create,
 			expectedCode:       http.StatusOK,
 			expectedData:       checkCreate,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
-			name:              "read assets",
+			name:               "read assets",
 			method:             http.MethodPost,
 			token:              token,
-			path:               assetAddr+"/read",
+			path:               assetAddr + "/read",
 			requestBody:        read,
 			expectedCode:       http.StatusOK,
 			expectedData:       checkRead,
@@ -135,7 +136,7 @@ func TestAsset(t *testing.T) {
 			name:               "succesful update",
 			method:             http.MethodPut,
 			token:              token,
-			path:               assetAddr+"/update",
+			path:               assetAddr + "/update",
 			requestBody:        update,
 			expectedCode:       http.StatusOK,
 			expectedData:       checkUpdate,
@@ -145,13 +146,12 @@ func TestAsset(t *testing.T) {
 			name:               "succesful delete",
 			method:             http.MethodDelete,
 			token:              token,
-			path:               assetAddr+"/delete",
+			path:               assetAddr + "/delete",
 			requestBody:        delete,
 			expectedCode:       http.StatusOK,
 			expectedData:       checkDelete,
 			expectedStatusCode: http.StatusOK,
 		},
-
 	}
 
 	var users []models.User
@@ -190,7 +190,6 @@ func TestAsset(t *testing.T) {
 	}
 }
 
-
 func user(t *testing.T, users []models.User) string {
 	return `{"id": 1,"name": "John Snow"}`
 }
@@ -202,7 +201,7 @@ func checkUser(t *testing.T, db *sqlx.DB, users []models.User, response []byte) 
 		t.Fatalf("Failed to unmarshal JSON file on check user: %v", err)
 	}
 	return users
-} 
+}
 
 func create(t *testing.T, users []models.User) string {
 	contentBody, err := ioutil.ReadFile("../../artifacts/asset/create.json")
@@ -214,7 +213,7 @@ func create(t *testing.T, users []models.User) string {
 
 func checkCreate(t *testing.T, db *sqlx.DB, users []models.User, response []byte) []models.User {
 	return users
-} 
+}
 
 func read(t *testing.T, users []models.User) string {
 	return `[{"id": 1}]`
@@ -278,14 +277,14 @@ func checkDelete(t *testing.T, db *sqlx.DB, users []models.User, response []byte
 	assert.NotEqual(t, nil, err)
 	assert.Equal(t, "sql: no rows in result set", err.Error())
 	return users
-} 
+}
 
 // HINT: cleanup tables is run only before test, not after
 // in this way is easy to check manually after failing tests
 // but before running test we can rely DB will be cleaned up
 // this ensure reliable behavior on tests
 func cleanupTables(db *sqlx.DB) error {
-	// Clean up assets table 
+	// Clean up assets table
 	// DELETE ON CASCADE should cleanup all underlying
 	_, err := db.Exec("DELETE FROM assets")
 	if err != nil {
@@ -296,6 +295,6 @@ func cleanupTables(db *sqlx.DB) error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }

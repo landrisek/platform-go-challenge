@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package controller
@@ -26,16 +27,16 @@ func TestUser(t *testing.T) {
 	vaultConfig := vault.VaultConfig{
 		Address: os.Getenv("VAULT_ADDR"),
 		Token:   os.Getenv("VAULT_TOKEN"),
-		Mount: os.Getenv("VAULT_MOUNT"),
+		Mount:   os.Getenv("VAULT_MOUNT"),
 	}
 	port, err := strconv.Atoi(os.Getenv("MYSQL_PORT"))
 	if err != nil {
 		log.Fatalf("Invalid port: %v", err)
 	}
 	dbConfig := models.DBConfig{
-		Host:       os.Getenv("MYSQL_HOST"),
-		Port:       port,
-		Database:   os.Getenv("MYSQL_DATABASE"),
+		Host:     os.Getenv("MYSQL_HOST"),
+		Port:     port,
+		Database: os.Getenv("MYSQL_DATABASE"),
 	}
 
 	userAddr := fmt.Sprintf("http://localhost:%s", serverPort)
@@ -65,16 +66,14 @@ func TestUser(t *testing.T) {
 		token              string
 		path               string
 		requestBody        string
-		expectedCode       int
 		expectedStatusCode int
 	}{
 		{
-			name:              "success create user",
+			name:               "success create user",
 			method:             http.MethodPost,
 			token:              "XXX",
 			path:               "/create",
 			requestBody:        `{"name": "John Snow"}`,
-			expectedCode:       http.StatusOK,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
@@ -83,7 +82,6 @@ func TestUser(t *testing.T) {
 			token:              "XXX",
 			path:               "/create",
 			requestBody:        "invalid",
-			expectedCode:       http.StatusOK,
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
@@ -91,7 +89,6 @@ func TestUser(t *testing.T) {
 			token:              "YYY",
 			path:               "/create",
 			requestBody:        "empty-create.json",
-			expectedCode:       http.StatusUnauthorized,
 			expectedStatusCode: http.StatusUnauthorized,
 		},
 	}
