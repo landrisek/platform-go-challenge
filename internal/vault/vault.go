@@ -79,7 +79,7 @@ func GetSQLCredentials(vaultConfig VaultConfig) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	zeroVaultConfig(vaultConfig)
 	// HINT: this will be removed, left here for discussion
 	fmt.Println("Username:", vaultResponse.Data.Username)
 	fmt.Println("Password:", vaultResponse.Data.Password)
@@ -88,4 +88,29 @@ func GetSQLCredentials(vaultConfig VaultConfig) (map[string]string, error) {
 		"username": vaultResponse.Data.Username,
 		"password": vaultResponse.Data.Password,
 	}, nil
+}
+
+// this make our memory not compromised, even if attacker
+// get inside of our infrastructure
+func zeroVaultConfig(vaultConfig *VaultConfig) {
+	zeroString(&vaultConfig.Address)
+	zeroString(&vaultConfig.Token)
+	zeroString(&vaultConfig.Mount)
+}
+
+func zeroString(str *string) {
+	if len(*str) > 0 {
+		randomBytes := make([]byte, len(*str))
+		_, err := rand.Read(randomBytes)
+		if err != nil {
+			// Handle error
+			return
+		}
+
+		for i := 0; i < len(randomBytes); i++ {
+			randomBytes[i] = 0
+		}
+
+		*str = string(randomBytes)
+	}
 }

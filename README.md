@@ -54,7 +54,7 @@ However, it's important to note that while Redis is a performant and efficient d
 
 ## Cache and hot spots
 
-Data structure expect that no json field is mandatory - this allows to reduce amount of bytes trafficed through TCP, free caller from providing unnecessary data and also do not write data in mysql which are there (or at least do not require IGNORE WRITE logic including). However it require additional logic and validation in model layer.
+For higher througpout proposed design will be easy with implement limit
 
 While the implementation of Redis cache was not included in the current version of the system, it is a consideration for future enhancements. However, it is important to note that we prioritize other aspects such as clean design, proper testing, and overall system reliability over the implementation of a caching layer.
 
